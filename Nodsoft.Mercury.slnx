@@ -1,1 +1,4 @@
-<Solution />
+<Solution>
+  <Project Path="Nodsoft.Mercury.AppHost\Nodsoft.Mercury.AppHost.csproj" Type="Classic C#" />
+  <Project Path="Nodsoft.Mercury.ServiceDefaults\Nodsoft.Mercury.ServiceDefaults.csproj" Type="Classic C#" />
+</Solution>
