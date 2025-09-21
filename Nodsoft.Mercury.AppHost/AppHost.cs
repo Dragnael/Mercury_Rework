@@ -1,4 +1,5 @@
 using Aspire.Hosting.Azure;
+using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
@@ -7,12 +8,18 @@ IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(ar
 IResourceBuilder<AzureCosmosDBResource> cosmos = builder.AddAzureCosmosDB("cosmosdb")
 	.RunAsPreviewEmulator(emulator =>
 	{
-		emulator.WithLifetime(ContainerLifetime.Persistent);
+		emulator.WithDataVolume();
 		emulator.WithDataExplorer();
 	});
 
 IResourceBuilder<AzureCosmosDBDatabaseResource> formsDb = cosmos.AddCosmosDatabase("forms-db");
 IResourceBuilder<AzureCosmosDBContainerResource> formSources = formsDb.AddContainer("sources", "/id");
-IResourceBuilder<AzureCosmosDBContainerResource> forms = formsDb.AddContainer("forms", "/id");
+IResourceBuilder<AzureCosmosDBContainerResource> templates = formsDb.AddContainer("templates", "/id");
+IResourceBuilder<AzureCosmosDBContainerResource> submissions = formsDb.AddContainer("submissions", "/id");
+#pragma warning restore ASPIRECOSMOSDB001
+
+IResourceBuilder<AzureFunctionsProjectResource> azFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions>("functions")
+	.WithReference(formsDb, "formsDb")
+	.WaitFor(formsDb);
 
 builder.Build().Run();
