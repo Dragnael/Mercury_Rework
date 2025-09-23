@@ -11,7 +11,7 @@ public sealed class FormSource
 	/// <summary>
 	/// The ID of the form source.
 	/// </summary>
-	public required Guid Id { get; set; }
+	public required Guid Id { get; set; } = Guid.CreateVersion7();
 	
 	/// <summary>
 	/// The name of the form source.
@@ -38,4 +38,9 @@ public sealed class FormSource
 	/// All form templates owned by this form source.
 	/// </summary>
 	public List<FormTemplate> Templates { get; set; } = [];
+	
+	/// <summary>
+	/// The access tokens for this form source.
+	/// </summary>
+	public List<FormAccessToken> AccessTokens { get; set; } = [];
 }
