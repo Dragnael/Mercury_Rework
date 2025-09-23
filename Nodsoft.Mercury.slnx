@@ -2,5 +2,6 @@
   <Project Path="Nodsoft.Mercury.AppHost\Nodsoft.Mercury.AppHost.csproj" Type="Classic C#" />
   <Project Path="Nodsoft.Mercury.Data\Nodsoft.Mercury.Data.csproj" Type="Classic C#" />
   <Project Path="Nodsoft.Mercury.Functions\Nodsoft.Mercury.Functions.csproj" Type="Classic C#" />
+  <Project Path="Nodsoft.Mercury.Models\Nodsoft.Mercury.Models.csproj" Type="Classic C#" />
   <Project Path="Nodsoft.Mercury.ServiceDefaults\Nodsoft.Mercury.ServiceDefaults.csproj" Type="Classic C#" />
 </Solution>
