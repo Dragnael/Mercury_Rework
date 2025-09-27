@@ -6,6 +6,10 @@
 		<OutputType>Exe</OutputType>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+
+		<!-- https://github.com/Azure/azure-functions-host/issues/5756#issuecomment-599751436 -->
+		<_FunctionsSkipCleanOutput>true</_FunctionsSkipCleanOutput>
+		<ExcludeGeneratedDebugSymbol>false</ExcludeGeneratedDebugSymbol>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -22,7 +26,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Nodsoft.Mercury.Data\Nodsoft.Mercury.Data.csproj" />
+		<ProjectReference Include="..\Nodsoft.Mercury.Data\Nodsoft.Mercury.Data.csproj" />
+		<ProjectReference Include="..\Nodsoft.Mercury.Models\Nodsoft.Mercury.Models.csproj" />
+		<ProjectReference Include="..\Nodsoft.Mercury.ServiceDefaults\Nodsoft.Mercury.ServiceDefaults.csproj" />
 	</ItemGroup>
 
 </Project>
