@@ -3,6 +3,9 @@ using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
+IResourceBuilder<AzureStorageResource> bulkStore = builder.AddAzureStorage("bulk-storage")
+	.RunAsEmulator();
+
 // Database: CosmosDB (serverless)
 #pragma warning disable ASPIRECOSMOSDB001
 IResourceBuilder<AzureCosmosDBResource> cosmos = builder.AddAzureCosmosDB("cosmosdb")
@@ -13,13 +16,15 @@ IResourceBuilder<AzureCosmosDBResource> cosmos = builder.AddAzureCosmosDB("cosmo
 	});
 
 IResourceBuilder<AzureCosmosDBDatabaseResource> formsDb = cosmos.AddCosmosDatabase("forms-db");
-IResourceBuilder<AzureCosmosDBContainerResource> formSources = formsDb.AddContainer("sources", "/id");
-IResourceBuilder<AzureCosmosDBContainerResource> templates = formsDb.AddContainer("templates", "/id");
-IResourceBuilder<AzureCosmosDBContainerResource> submissions = formsDb.AddContainer("submissions", "/id");
 #pragma warning restore ASPIRECOSMOSDB001
 
+IResourceBuilder<AzureStorageResource> opsStore = builder.AddAzureStorage("ops-storage")
+	.RunAsEmulator();
+
 IResourceBuilder<AzureFunctionsProjectResource> azFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions>("functions")
-	.WithReference(formsDb, "formsDb")
-	.WaitFor(formsDb);
+	.WithReference(cosmos)
+	.WaitFor(cosmos)
+	.WithExternalHttpEndpoints()
+	.WithHostStorage(opsStore);
 
 builder.Build().Run();
