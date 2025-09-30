@@ -20,211 +20,220 @@ public static class Extensions
 	private const string HealthEndpointPath = "/health";
 	private const string AlivenessEndpointPath = "/alive";
 
-	/// <summary>
-	/// Adds common .NET Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
-	/// </summary>
-	/// <param name="builder">The host builder.</param>
-	/// <typeparam name="TBuilder">The type of the host builder.</typeparam>
-	/// <returns>The host builder.</returns>
-	/// <param name="configureMeter">Optional action to configure the MeterProviderBuilder for metrics.</param>
-	/// <param name="configureTracer">Optional action to configure the TracerProviderBuilder for tracing.</param>
-	public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder, 
-		Action<MeterProviderBuilder>? configureMeter = null,
-		Action<TracerProviderBuilder>? configureTracer = null
-	) where TBuilder : IHostApplicationBuilder
+	extension<TBuilder>(TBuilder builder) where TBuilder : IHostApplicationBuilder
 	{
-		builder.ConfigureOpenTelemetry();
-		builder.ConfigureOtelSerilog();
-		builder.AddDefaultHealthChecks();
+		/// <summary>
+		/// Adds common .NET Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
+		/// </summary>
+		/// <param name="builder">The host builder.</param>
+		/// <typeparam name="TBuilder">The type of the host builder.</typeparam>
+		/// <returns>The host builder.</returns>
+		/// <param name="configureMeter">Optional action to configure the MeterProviderBuilder for metrics.</param>
+		/// <param name="configureTracer">Optional action to configure the TracerProviderBuilder for tracing.</param>
+		public TBuilder AddServiceDefaults(
+			Action<MeterProviderBuilder>? configureMeter = null,
+			Action<TracerProviderBuilder>? configureTracer = null
+		) {
+			builder.ConfigureOpenTelemetry();
+			builder.ConfigureOtelSerilog();
+			builder.AddDefaultHealthChecks();
 
-		builder.Services.AddServiceDiscovery();
+			builder.Services.AddServiceDiscovery();
 
-		builder.Services.ConfigureHttpClientDefaults(http =>
-		{
-			// Turn on resilience by default
-			http.AddStandardResilienceHandler();
-
-			// Turn on service discovery by default
-			http.AddServiceDiscovery();
-		});
-
-		// Uncomment the following to restrict the allowed schemes for service discovery.
-		// builder.Services.Configure<ServiceDiscoveryOptions>(options =>
-		// {
-		//     options.AllowedSchemes = ["https"];
-		// });
-
-		return builder;
-	}
-
-	/// <summary>
-	/// Configures OpenTelemetry and Serilog for the application.
-	/// </summary>
-	/// <param name="builder">The host builder.</param>
-	/// <typeparam name="TBuilder">The type of the host builder.</typeparam>
-	/// <returns>The host builder.</returns>
-	public static TBuilder ConfigureOtelSerilog<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
-	{
-		Log.Logger = new LoggerConfiguration()
-			.WriteTo.Console()
-			.CreateBootstrapLogger();
-		
-		builder.Services.AddSerilog((services, lc) => lc
-			.ReadFrom.Configuration(builder.Configuration)
-			.ReadFrom.Services(services)
-			.Enrich.FromLogContext()
-			.Enrich.WithProcessId()
-			.Enrich.WithThreadId()
-			.Enrich.WithClientIp()
-			.Enrich.WithDemystifiedStackTraces()
-			.WriteTo.Console(theme: Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme.Code)
-			.WriteTo.OpenTelemetry(options =>
+			builder.Services.ConfigureHttpClientDefaults(http =>
 			{
-				options.Endpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
-				string[] headers = builder.Configuration["OTEL_EXPORTER_OTLP_HEADERS"]?.Split(',') ?? [];
-				
-				foreach (string header in headers)
+				// Turn on resilience by default
+				http.AddStandardResilienceHandler();
+
+				// Turn on service discovery by default
+				http.AddServiceDiscovery();
+			});
+
+			// Uncomment the following to restrict the allowed schemes for service discovery.
+			// builder.Services.Configure<ServiceDiscoveryOptions>(options =>
+			// {
+			//     options.AllowedSchemes = ["https"];
+			// });
+
+			return builder;
+		}
+		
+		/// <summary>
+		/// Configures OpenTelemetry and Serilog for the application.
+		/// </summary>
+		/// <param name="builder">The host builder.</param>
+		/// <typeparam name="TBuilder">The type of the host builder.</typeparam>
+		/// <returns>The host builder.</returns>
+		public TBuilder ConfigureOtelSerilog()
+		{
+			Log.Logger = new LoggerConfiguration()
+				.WriteTo.Console()
+				.CreateBootstrapLogger();
+		
+			builder.Services.AddSerilog((services, lc) => lc
+				.ReadFrom.Configuration(builder.Configuration)
+				.ReadFrom.Services(services)
+				.Enrich.FromLogContext()
+				.Enrich.WithProcessId()
+				.Enrich.WithThreadId()
+				.Enrich.WithClientIp()
+				.Enrich.WithDemystifiedStackTraces()
+				.WriteTo.Console(theme: Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme.Code)
+				.WriteTo.OpenTelemetry(options =>
 				{
-					(string key, string value) = header.Split('=') switch
+					options.Endpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+					string[] headers = builder.Configuration["OTEL_EXPORTER_OTLP_HEADERS"]?.Split(',') ?? [];
+				
+					foreach (string header in headers)
 					{
-						[{ } k, { } v] => (k, v),
-						var v => throw new($"Invalid header format {v}")
-					};
+						(string key, string value) = header.Split('=') switch
+						{
+							[{ } k, { } v] => (k, v),
+							var v => throw new($"Invalid header format {v}")
+						};
 
-					options.Headers.Add(key, value);
-				}
+						options.Headers.Add(key, value);
+					}
 
-				options.ResourceAttributes.Add("service.name", "api");
-			}));
+					options.ResourceAttributes.Add("service.name", "api");
+				}));
 		
-		return builder;
-	}
-	
-	/// <summary>
-	/// Configures OpenTelemetry for the application.
-	/// </summary>
-	/// <param name="builder">The host builder.</param>
-	/// <typeparam name="TBuilder">The type of the host builder.</typeparam>
-	/// <param name="configureMeter">Optional action to configure the MeterProviderBuilder for metrics.</param>
-	/// <param name="configureTracer">Optional action to configure the TracerProviderBuilder for tracing.</param>
-	/// <returns>The host builder.</returns>
-	public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder,
-		Action<MeterProviderBuilder>? configureMeter = null,
-		Action<TracerProviderBuilder>? configureTracer = null
-	) where TBuilder : IHostApplicationBuilder
-	{
-		builder.Logging.AddOpenTelemetry(logging =>
-		{
-			logging.IncludeFormattedMessage = true;
-			logging.IncludeScopes = true;
-		});
-
-		builder.Services.AddOpenTelemetry()
-			.WithMetrics(metrics =>
+			return builder;
+		}
+		
+		/// <summary>
+		/// Configures OpenTelemetry for the application.
+		/// </summary>
+		/// <param name="builder">The host builder.</param>
+		/// <typeparam name="TBuilder">The type of the host builder.</typeparam>
+		/// <param name="configureMeter">Optional action to configure the MeterProviderBuilder for metrics.</param>
+		/// <param name="configureTracer">Optional action to configure the TracerProviderBuilder for tracing.</param>
+		/// <returns>The host builder.</returns>
+		public TBuilder ConfigureOpenTelemetry(
+			Action<MeterProviderBuilder>? configureMeter = null,
+			Action<TracerProviderBuilder>? configureTracer = null
+		) {
+			builder.Logging.AddOpenTelemetry(logging =>
 			{
-				metrics.AddAspNetCoreInstrumentation()
-					.AddHttpClientInstrumentation()
-					.AddRuntimeInstrumentation();
-				
-				configureMeter?.Invoke(metrics);
-			})
-			.WithTracing(tracing =>
-			{
-				tracing.AddSource(builder.Environment.ApplicationName)
-					.AddAspNetCoreInstrumentation()
-					// Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
-					//.AddGrpcClientInstrumentation()
-					.AddHttpClientInstrumentation();
-				
-				configureTracer?.Invoke(tracing);
+				logging.IncludeFormattedMessage = true;
+				logging.IncludeScopes = true;
 			});
 
-		builder.AddOpenTelemetryExporters();
+			builder.Services.AddOpenTelemetry()
+				.WithMetrics(metrics =>
+				{
+					metrics.AddAspNetCoreInstrumentation()
+						.AddHttpClientInstrumentation()
+						.AddRuntimeInstrumentation();
+				
+					configureMeter?.Invoke(metrics);
+				})
+				.WithTracing(tracing =>
+				{
+					tracing.AddSource(builder.Environment.ApplicationName)
+						.AddAspNetCoreInstrumentation()
+						// Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
+						//.AddGrpcClientInstrumentation()
+						.AddHttpClientInstrumentation();
+				
+					configureTracer?.Invoke(tracing);
+				});
 
-		return builder;
-	}
+			builder.AddOpenTelemetryExporters();
 
-	/// <summary>
-	/// Adds OpenTelemetry exporters to the application.
-	/// </summary>
-	/// <param name="builder">The host builder.</param>
-	/// <typeparam name="TBuilder">The type of the host builder.</typeparam>
-	/// <returns>The host builder.</returns>
-	private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
-	{
-		bool useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
-
-		if (useOtlpExporter)
-		{
-			builder.Services.AddOpenTelemetry().UseOtlpExporter();
+			return builder;
 		}
 
-		// Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
-		//if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
-		//{
-		//    builder.Services.AddOpenTelemetry()
-		//       .UseAzureMonitor();
-		//}
-
-		return builder;
-	}
-
-	/// <summary>
-	/// Adds default health checks to the application.
-	/// </summary>
-	/// <param name="builder">The host builder.</param>
-	/// <typeparam name="TBuilder">The type of the host builder.</typeparam>
-	/// <returns>The host builder.</returns>
-	public static TBuilder AddDefaultHealthChecks<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
-	{
-		builder.Services.AddHealthChecks()
-			// Add a default liveness check to ensure app is responsive
-			.AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
-
-		return builder;
-	}
-
-	public static WebApplication MapDefaultEndpoints(this WebApplication app)
-	{
-		// Adding health checks endpoints to applications in non-development environments has security implications.
-		// See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
-		if (app.Environment.IsDevelopment())
+		/// <summary>
+		/// Adds OpenTelemetry exporters to the application.
+		/// </summary>
+		/// <param name="builder">The host builder.</param>
+		/// <typeparam name="TBuilder">The type of the host builder.</typeparam>
+		/// <returns>The host builder.</returns>
+		private TBuilder AddOpenTelemetryExporters()
 		{
-			// All health checks must pass for app to be considered ready to accept traffic after starting
-			app.MapHealthChecks(HealthEndpointPath);
+			bool useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
 
-			// Only health checks tagged with the "live" tag must pass for app to be considered alive
-			app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
+			if (useOtlpExporter)
 			{
-				Predicate = r => r.Tags.Contains("live")
-			});
+				builder.Services.AddOpenTelemetry().UseOtlpExporter();
+			}
+
+			// Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
+			//if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+			//{
+			//    builder.Services.AddOpenTelemetry()
+			//       .UseAzureMonitor();
+			//}
+
+			return builder;
 		}
 
-		return app;
+		/// <summary>
+		/// Adds default health checks to the application.
+		/// </summary>
+		/// <param name="builder">The host builder.</param>
+		/// <typeparam name="TBuilder">The type of the host builder.</typeparam>
+		/// <returns>The host builder.</returns>
+		public TBuilder AddDefaultHealthChecks()
+		{
+			builder.Services.AddHealthChecks()
+				// Add a default liveness check to ensure app is responsive
+				.AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
+
+			return builder;
+		}
 	}
+
+	extension(WebApplication app)
+	{
+		/// <summary>
+		/// Maps default health check endpoints to the application.
+		/// </summary>
+		/// <param name="app">The application builder.</param>
+		/// <returns>The application builder.</returns>
+		public WebApplication MapDefaultEndpoints()
+		{
+			// Adding health checks endpoints to applications in non-development environments has security implications.
+			// See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
+			if (app.Environment.IsDevelopment())
+			{
+				// All health checks must pass for app to be considered ready to accept traffic after starting
+				app.MapHealthChecks(HealthEndpointPath);
+
+				// Only health checks tagged with the "live" tag must pass for app to be considered alive
+				app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
+				{
+					Predicate = r => r.Tags.Contains("live")
+				});
+			}
+
+			return app;
+		}
 	
-	/// <summary>
-	/// Configures the WebApplication to log requests via Serilog.
-	/// </summary>
-	/// <param name="app">The application builder.</param>
-	/// <returns>The application builder.</returns>
-	public static WebApplication UseSerilogRequestLogging(this WebApplication app)
-	{
-		// Request Logging
-		app.UseSerilogRequestLogging(options =>
+		/// <summary>
+		/// Configures the WebApplication to log requests via Serilog.
+		/// </summary>
+		/// <param name="app">The application builder.</param>
+		/// <returns>The application builder.</returns>
+		public WebApplication UseSerilogRequestLogging()
 		{
-			// Customize the message template
-			options.MessageTemplate =
-				"{RequestScheme} {RequestMethod} {RequestPath} by {RequestClient} responded {StatusCode} in {Elapsed:0.0000} ms";
-
-			// Attach additional properties to the request completion event
-			options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+			// Request Logging
+			app.UseSerilogRequestLogging(options =>
 			{
-				diagnosticContext.Set("RequestClient", httpContext.Connection.RemoteIpAddress);
-				diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme.ToUpperInvariant());
-			};
-		});
+				// Customize the message template
+				options.MessageTemplate =
+					"{RequestScheme} {RequestMethod} {RequestPath} by {RequestClient} responded {StatusCode} in {Elapsed:0.0000} ms";
+
+				// Attach additional properties to the request completion event
+				options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+				{
+					diagnosticContext.Set("RequestClient", httpContext.Connection.RemoteIpAddress);
+					diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme.ToUpperInvariant());
+				};
+			});
         
-		return app;
+			return app;
+		}
 	}
 }
