@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Nodsoft.Mercury.Data.Data;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Nodsoft.Mercury.Data.Models;
 
 namespace Nodsoft.Mercury.Data;
 
@@ -25,4 +26,28 @@ public sealed class MercuryDbContext : DbContext
 	/// </summary>
 	/// <param name="options">The options for this context.</param>
 	public MercuryDbContext(DbContextOptions<MercuryDbContext> options) : base(options) { }
+
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
+	{
+		base.OnModelCreating(modelBuilder);
+		
+		modelBuilder.Entity<FormSource>(entity =>
+		{
+			entity.ToContainer(nameof(Sources));
+			entity.HasPartitionKey(e => e.PartitionKey);
+			entity.UseETagConcurrency()
+		});
+		
+		modelBuilder.Entity<FormTemplate>(entity =>
+		{
+			entity.ToContainer(nameof(Templates));
+			entity.HasPartitionKey(e => e.PartitionKey);
+		});
+		
+		modelBuilder.Entity<FormSubmission>(entity =>
+		{
+			entity.ToContainer(nameof(Submissions));
+			entity.HasPartitionKey(e => e.PartitionKey);
+		});
+	}
 }

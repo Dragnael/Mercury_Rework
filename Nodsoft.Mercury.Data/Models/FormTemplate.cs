@@ -1,17 +1,17 @@
 ﻿using JetBrains.Annotations;
 
-namespace Nodsoft.Mercury.Data.Data;
+namespace Nodsoft.Mercury.Data.Models;
 
 /// <summary>
 /// Represents a template for a form.
 /// A template is a set of fields and their specific configurations.
 /// </summary>
-public sealed class FormTemplate
+public sealed record FormTemplate : CosmosModelBase<Guid>
 {
 	/// <summary>
 	/// The ID of the form template.
 	/// </summary>
-	public required Guid Id { get; set; }
+	public override required Guid Id { get; set; }
 	
 	/// <summary>
 	/// The name of the form template.

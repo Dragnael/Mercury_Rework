@@ -1,10 +1,10 @@
-﻿namespace Nodsoft.Mercury.Data.Data;
+﻿namespace Nodsoft.Mercury.Data.Models;
 
 /// <summary>
 /// Represents an access token for a form.
 /// These are used to authenticate and authorize form submissions.
 /// </summary>
-public class FormAccessToken
+public record FormAccessToken
 {
 	/// <summary>
 	/// The ID of the access token.

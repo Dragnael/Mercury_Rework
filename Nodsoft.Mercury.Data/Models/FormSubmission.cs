@@ -1,16 +1,16 @@
 ﻿using System.Net;
 
-namespace Nodsoft.Mercury.Data.Data;
+namespace Nodsoft.Mercury.Data.Models;
 
 /// <summary>
 /// Represents a form submission. This 
 /// </summary>
-public sealed class FormSubmission
+public sealed record FormSubmission : CosmosModelBase<Guid>
 {
 	/// <summary>
 	/// The ID of the form submission.
 	/// </summary>
-	public required Guid Id { get; set; } = Guid.CreateVersion7();
+	public override required Guid Id { get; set; } = Guid.CreateVersion7();
 	
 	/// <summary>
 	/// The form template ID.
@@ -50,4 +50,12 @@ public sealed class FormSubmission
 	/// </summary>
 	/// <seealso cref="AccessTokenId" />
 	public required FormAccessToken AccessToken { get; set; }
+	
+	/// <summary>
+	/// The ID of the FormSource related to this submission.
+	/// </summary>
+	/// <remarks>
+	/// This is only used for the partitioning of the form submissions.
+	/// </remarks>
+	public required Guid FormSourceId { get; set; }
 }

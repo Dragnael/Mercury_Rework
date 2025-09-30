@@ -1,17 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Nodsoft.Mercury.Data.Data;
+namespace Nodsoft.Mercury.Data.Models;
 
 /// <summary>
 /// Represents a source of forms within the Mercury application.
 /// This typically represents an application or a module.
 /// </summary>
-public sealed class FormSource
+public sealed record FormSource : CosmosModelBase<Guid>
 {
 	/// <summary>
 	/// The ID of the form source.
 	/// </summary>
-	public required Guid Id { get; set; } = Guid.CreateVersion7();
+	public override required Guid Id { get; set; } = Guid.CreateVersion7();
 	
 	/// <summary>
 	/// The name of the form source.
