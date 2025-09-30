@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Nodsoft.Mercury.Data;
-using Nodsoft.Mercury.Data.Data;
+using Nodsoft.Mercury.Data.Models;
 
 namespace Nodsoft.Mercury.Functions.Services;
 
@@ -39,6 +39,14 @@ public sealed class FormSourceService
 		=> await _context.Sources.FirstOrDefaultAsync(s => s.AccessTokens.Any(t => t.Id == token), ct);
 
 	/// <summary>
+	/// Gets all form sources.
+	/// </summary>
+	/// <param name="ct">The cancellation token.</param>
+	/// <returns>All form sources.</returns>
+	public async Task<List<FormSource>> GetAllFormSourcesAsync(CancellationToken ct = default)
+		=> await _context.Sources.ToListAsync(ct);
+
+	/// <summary>
 	/// Adds a form source to the database.
 	/// </summary>
 	/// <param name="source">The form source to add.</param>
@@ -47,6 +55,7 @@ public sealed class FormSourceService
 	public async Task<FormSource> AddFormSourceAsync(FormSource source, CancellationToken ct = default)
 	{
 		source.Id = Guid.CreateVersion7();
+		source.PartitionKey = source.Id.ToString();
 		
 		_context.Sources.Add(source);
 		await _context.SaveChangesAsync(ct);
@@ -75,14 +84,14 @@ public sealed class FormSourceService
 	/// <returns>Whether the deletion was successful.</returns>
 	public async Task<bool> DeleteFormSourceAsync(Guid sourceId, CancellationToken ct = default)
 	{
-		if (await _context.Sources.FindAsync([sourceId], ct) is not { } existing)
+		if (await _context.Sources.Where(s => s.Id == sourceId).FirstOrDefaultAsync(ct) is not { } existing)
 		{
 			return false;
 		}
 		
 		EntityEntry<FormSource> entry = _context.Sources.Remove(existing);
 		await _context.SaveChangesAsync(ct);
-		
-		return entry.State is EntityState.Deleted;
+
+		return true;
 	}
 }
