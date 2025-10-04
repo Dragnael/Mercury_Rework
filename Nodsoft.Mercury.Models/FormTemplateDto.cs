@@ -10,7 +10,7 @@ public sealed record FormTemplateDto
 	/// <summary>
 	/// The ID of the form template.
 	/// </summary>
-	public required Guid Id { get; set; }
+	public Guid Id { get; set; } = Guid.CreateVersion7();
 	
 	/// <summary>
 	/// The name of the form template.

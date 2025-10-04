@@ -84,7 +84,7 @@ public sealed class FormSourceService
 	/// <returns>Whether the deletion was successful.</returns>
 	public async Task<bool> DeleteFormSourceAsync(Guid sourceId, CancellationToken ct = default)
 	{
-		if (await _context.Sources.Where(s => s.Id == sourceId).FirstOrDefaultAsync(ct) is not { } existing)
+		if (await _context.Sources.FirstOrDefaultAsync(s => s.Id == sourceId, ct) is not { } existing)
 		{
 			return false;
 		}

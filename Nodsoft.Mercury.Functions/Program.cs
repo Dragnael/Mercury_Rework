@@ -16,6 +16,7 @@ builder.Services
 	.ConfigureFunctionsApplicationInsights();
 
 builder.Services.AddScoped<FormSourceService>();
+builder.Services.AddScoped<FormTemplateService>();
 
 using IHost host = builder.Build();
 
