@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Nodsoft.Mercury.Data.Extensions;
 using Nodsoft.Mercury.Data.Models;
 
 namespace Nodsoft.Mercury.Data;
@@ -33,21 +34,17 @@ public sealed class MercuryDbContext : DbContext
 		
 		modelBuilder.Entity<FormSource>(entity =>
 		{
-			entity.ToContainer(nameof(Sources));
-			entity.HasPartitionKey(e => e.PartitionKey);
-			entity.UseETagConcurrency()
+			entity.IsCosmosEntity<FormSource, Guid>(nameof(Sources));
 		});
 		
 		modelBuilder.Entity<FormTemplate>(entity =>
 		{
-			entity.ToContainer(nameof(Templates));
-			entity.HasPartitionKey(e => e.PartitionKey);
+			entity.IsCosmosEntity<FormTemplate, Guid>(nameof(Templates));
 		});
 		
 		modelBuilder.Entity<FormSubmission>(entity =>
 		{
-			entity.ToContainer(nameof(Submissions));
-			entity.HasPartitionKey(e => e.PartitionKey);
+			entity.IsCosmosEntity<FormSubmission, Guid>(nameof(Submissions));
 		});
 	}
 }
