@@ -4,7 +4,7 @@
 /// Represents an access token for a form.
 /// These are used to authenticate and authorize form submissions.
 /// </summary>
-public record FormAccessToken
+public record FormAccessToken : CosmosModelBase<Guid>
 {
 	/// <summary>
 	/// The ID of the access token.
@@ -12,7 +12,7 @@ public record FormAccessToken
 	/// This serves as the public identifier for the access token,
 	/// as well as the primary key in the database.
 	/// </summary>
-	public required Guid Id { get; set; } = Guid.CreateVersion7();
+	public override required Guid Id { get; set; } = Guid.CreateVersion7();
 	
 	/// <summary>
 	/// The form source ID.

@@ -15,8 +15,11 @@ builder.Services
 	.AddApplicationInsightsTelemetryWorkerService()
 	.ConfigureFunctionsApplicationInsights();
 
+builder.ConfigureOpenTelemetry();
+
 builder.Services.AddScoped<FormSourceService>();
 builder.Services.AddScoped<FormTemplateService>();
+builder.Services.AddScoped<FormAccessService>();
 
 using IHost host = builder.Build();
 

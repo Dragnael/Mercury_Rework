@@ -13,6 +13,11 @@ public sealed class MercuryDbContext : DbContext
 	public DbSet<FormSource> Sources { get; init; }
 	
 	/// <summary>
+	/// The form access tokens in the database.
+	/// </summary>
+	public DbSet<FormAccessToken> AccessTokens { get; init; }
+	
+	/// <summary>
 	/// The form templates in the database.
 	/// </summary>
 	public DbSet<FormTemplate> Templates { get; init; }
@@ -35,6 +40,11 @@ public sealed class MercuryDbContext : DbContext
 		modelBuilder.Entity<FormSource>(entity =>
 		{
 			entity.IsCosmosEntity<FormSource, Guid>(nameof(Sources));
+		});
+
+		modelBuilder.Entity<FormAccessToken>(entity =>
+		{
+			entity.IsCosmosEntity<FormAccessToken, Guid>(nameof(AccessTokens));
 		});
 		
 		modelBuilder.Entity<FormTemplate>(entity =>
