@@ -7,7 +7,7 @@ public class FormSubmissionDto
 	/// <summary>
 	/// The ID of the form submission.
 	/// </summary>
-	public required Guid Id { get; set; } = Guid.CreateVersion7();
+	public Guid Id { get; set; } = Guid.CreateVersion7();
 	
 	/// <summary>
 	/// The form template ID.
@@ -28,7 +28,7 @@ public class FormSubmissionDto
 	/// <summary>
 	/// The IP address of the submitter.
 	/// </summary>
-	public required IPAddress SubmittedBy { get; set; }
+	public required string SubmittedBy { get; set; }
 	
 	/// <summary>
 	/// The ID of the Access Token used for this submission.

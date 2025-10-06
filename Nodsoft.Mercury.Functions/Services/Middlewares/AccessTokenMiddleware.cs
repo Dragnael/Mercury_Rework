@@ -15,7 +15,7 @@ namespace Nodsoft.Mercury.Functions.Services.Middlewares;
 /// <summary>
 /// Represents a middleware for handling access tokens. 
 /// </summary>
-public class AccessTokenMiddleware : IFunctionsWorkerMiddleware
+public sealed class AccessTokenMiddleware : IFunctionsWorkerMiddleware
 {
 	public const string AccessTokenHeader = "X-AccessToken";
 	public const string AccessTokenFormKey = "x-access-token";
@@ -45,9 +45,7 @@ public class AccessTokenMiddleware : IFunctionsWorkerMiddleware
 			}
 			else if (funcCtx.GetHttpContext() is { Request.Form: { Count: > 0 } form } && form.TryGetValue(AccessTokenFormKey, out StringValues formValue))
 			{
-				accessToken = formValue.FirstOrDefault()?.Split(' ') is ["Bearer", var token]
-					? Guid.TryParse(token, out Guid parsed) ? parsed : null
-					: null;
+				accessToken = Guid.TryParse(formValue.FirstOrDefault(), out Guid parsed) ? parsed : null;
 			}
 
 			FormAccessService accessService = funcCtx.InstanceServices.GetRequiredService<FormAccessService>();

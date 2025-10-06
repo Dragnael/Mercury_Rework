@@ -21,6 +21,7 @@ builder.UseMiddleware<AccessTokenMiddleware>();
 builder.Services.AddScoped<FormSourceService>();
 builder.Services.AddScoped<FormTemplateService>();
 builder.Services.AddScoped<FormAccessService>();
+builder.Services.AddScoped<FormSubmissionService>();
 
 
 using IHost host = builder.Build();
