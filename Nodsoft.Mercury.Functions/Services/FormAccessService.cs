@@ -37,12 +37,13 @@ public sealed class FormAccessService
 	/// <param name="tokenId">The access token.</param>
 	/// <param name="sourceId">The ID of the form source.</param>
 	/// <param name="ct">The cancellation token.</param>
-	/// <returns>True if the token can be used to access the source; otherwise, false.</returns>
-	public async Task<bool> CanAccessSourceAsync(Guid tokenId, Guid sourceId, CancellationToken ct = default)
+	/// <returns>The form source for which this token is valid, or <see langword="null"/> if invalid or not found.</returns>
+	public async Task<Guid?> CanAccessSourceAsync(Guid tokenId, CancellationToken ct = default)
 		=> await _context.AccessTokens.FirstOrDefaultAsync(s => s.Id == tokenId, ct) is { Revoked: false } token
-			&& token.FormSourceId == sourceId
 			&& (token.Expires is null || token.Expires > DateTimeOffset.UtcNow)
-			&& await _context.Sources.AnyAsync(t => t.Id == sourceId, ct);
+			&& await _context.Sources.FirstOrDefaultAsync(t => t.Id == token.FormSourceId, ct) is { Id: { } sourceId }
+				? sourceId
+				: null;
 
 
 	/// <summary>
