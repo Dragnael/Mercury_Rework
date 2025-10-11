@@ -27,7 +27,7 @@ IResourceBuilder<AzureServiceBusResource> notificationsMq = builder.AddAzureServ
 		e.WithLifetime(ContainerLifetime.Persistent);
 	});
 
-IResourceBuilder<AzureServiceBusQueueResource> submissionsQueue = notificationsMq.AddServiceBusQueue("submissions-queue");
+IResourceBuilder<AzureServiceBusQueueResource> submissionsQueue = notificationsMq.AddServiceBusQueue("submissions-queue", "submissions");
 
 IResourceBuilder<AzureFunctionsProjectResource> submissionsFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions_Submission>("submissions-func")
 	.WithReference(formsDb).WaitFor(formsDb)
