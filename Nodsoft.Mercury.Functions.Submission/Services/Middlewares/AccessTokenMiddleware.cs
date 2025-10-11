@@ -10,7 +10,7 @@ using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Nodsoft.Mercury.Data;
 
-namespace Nodsoft.Mercury.Functions.Services.Middlewares;
+namespace Nodsoft.Mercury.Functions.Submission.Services.Middlewares;
 
 /// <summary>
 /// Represents a middleware for handling access tokens. 

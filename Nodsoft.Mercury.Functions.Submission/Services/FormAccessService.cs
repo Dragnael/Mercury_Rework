@@ -5,7 +5,7 @@ using Nodsoft.Mercury.Data.Models;
 // ReSharper disable EntityFramework.NPlusOne.IncompleteDataUsage
 // ReSharper disable EntityFramework.NPlusOne.IncompleteDataQuery
 
-namespace Nodsoft.Mercury.Functions.Services;
+namespace Nodsoft.Mercury.Functions.Submission.Services;
 
 /// <summary>
 /// Represents a service for handling form access, including access tokens. 

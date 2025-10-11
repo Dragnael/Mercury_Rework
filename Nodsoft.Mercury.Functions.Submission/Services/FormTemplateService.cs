@@ -2,7 +2,7 @@
 using Nodsoft.Mercury.Data;
 using Nodsoft.Mercury.Data.Models;
 
-namespace Nodsoft.Mercury.Functions.Services;
+namespace Nodsoft.Mercury.Functions.Submission.Services;
 
 /// <summary>
 /// Represents a service for handling form templates.

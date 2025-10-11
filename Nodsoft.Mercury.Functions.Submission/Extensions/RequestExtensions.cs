@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
-using Nodsoft.Mercury.Functions.Services.Middlewares;
+using Nodsoft.Mercury.Functions.Submission.Services.Middlewares;
 
-namespace Nodsoft.Mercury.Functions.Extensions;
+namespace Nodsoft.Mercury.Functions.Submission.Extensions;
 
 /// <summary>
 /// Provides extensions for working with HTTP requests made to Azure Functions.

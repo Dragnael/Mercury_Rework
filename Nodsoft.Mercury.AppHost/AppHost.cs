@@ -21,10 +21,23 @@ IResourceBuilder<AzureCosmosDBDatabaseResource> formsDb = cosmos.AddCosmosDataba
 IResourceBuilder<AzureStorageResource> opsStore = builder.AddAzureStorage("ops-storage")
 	.RunAsEmulator();
 
-IResourceBuilder<AzureFunctionsProjectResource> azFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions>("functions")
-	.WithReference(cosmos)
-	.WaitFor(cosmos)
+IResourceBuilder<AzureServiceBusResource> notificationsMq = builder.AddAzureServiceBus("notifications-mq")
+	.RunAsEmulator(e =>
+	{
+		e.WithLifetime(ContainerLifetime.Persistent);
+	});
+
+IResourceBuilder<AzureServiceBusQueueResource> submissionsQueue = notificationsMq.AddServiceBusQueue("submissions-queue");
+
+IResourceBuilder<AzureFunctionsProjectResource> submissionsFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions_Submission>("submissions-func")
+	.WithReference(formsDb).WaitFor(formsDb)
+	.WithReference(submissionsQueue).WaitFor(submissionsQueue)
 	.WithExternalHttpEndpoints()
+	.WithHostStorage(opsStore);
+
+IResourceBuilder<AzureFunctionsProjectResource> notificationsFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions_Notification>("notifications-func")
+	.WithReference(formsDb).WaitFor(formsDb)
+	.WithReference(notificationsMq).WaitFor(notificationsMq)
 	.WithHostStorage(opsStore);
 
 builder.Build().Run();

@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 using Nodsoft.Mercury.Data;
 using Nodsoft.Mercury.Data.Models;
-using Nodsoft.Mercury.Functions.Extensions;
-using Nodsoft.Mercury.Functions.Services;
-using Nodsoft.Mercury.Functions.Services.Middlewares;
+using Nodsoft.Mercury.Functions.Submission.Extensions;
+using Nodsoft.Mercury.Functions.Submission.Services;
+using Nodsoft.Mercury.Functions.Submission.Services.Middlewares;
 using Nodsoft.Mercury.Models;
 using Throw;
 
-namespace Nodsoft.Mercury.Functions.Functions;
+namespace Nodsoft.Mercury.Functions.Submission.Functions;
 
 /// <summary>
 /// Represents functions for form submissions. 

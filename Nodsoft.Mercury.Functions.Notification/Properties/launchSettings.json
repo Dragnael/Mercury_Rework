@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Nodsoft.Mercury.Functions.Notification": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7080",
+      "launchBrowser": false
+    }
+  }
+}

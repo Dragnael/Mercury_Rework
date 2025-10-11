@@ -6,10 +6,10 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Nodsoft.Mercury.Data.Models;
-using Nodsoft.Mercury.Functions.Services;
+using Nodsoft.Mercury.Functions.Submission.Services;
 using Nodsoft.Mercury.Models;
 
-namespace Nodsoft.Mercury.Functions.Functions;
+namespace Nodsoft.Mercury.Functions.Submission.Functions;
 
 /// <summary>
 /// Represents functions for form sources.
