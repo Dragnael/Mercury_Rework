@@ -3,14 +3,15 @@ using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nodsoft.Mercury.Data;
-using Nodsoft.Mercury.Functions.Services;
-using Nodsoft.Mercury.Functions.Services.Middlewares;
+using Nodsoft.Mercury.Functions.Submission.Services;
+using Nodsoft.Mercury.Functions.Submission.Services.Middlewares;
 
 FunctionsApplicationBuilder builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
 
-builder.AddCosmosDbContext<MercuryDbContext>("cosmosDb", "forms-db");
+builder.AddCosmosDbContext<MercuryDbContext>("forms-db", "forms-db");
+builder.AddAzureServiceBusClient("submissions-queue");
 
 builder.Services.AddApplicationInsightsTelemetryWorkerService();
 builder.Services.ConfigureFunctionsApplicationInsights();

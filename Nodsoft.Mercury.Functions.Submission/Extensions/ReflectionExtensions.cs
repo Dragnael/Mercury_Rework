@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 using Microsoft.Azure.Functions.Worker;
 using Throw;
 
-namespace Nodsoft.Mercury.Functions.Extensions;
+namespace Nodsoft.Mercury.Functions.Submission.Extensions;
 
 /// <summary>
 /// Various utilities for working with reflection.
