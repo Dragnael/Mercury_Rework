@@ -1,4 +1,5 @@
-﻿using Mapster;
+﻿using JetBrains.Annotations;
+using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -95,13 +96,13 @@ public sealed class FormSubmissionFunctions
 	/// <param name="req">The HTTP request.</param>
 	/// <returns>The created form submission.</returns>
 	[Function("IngestSubmission")]
-	public async Task<ActionResult> IngestSubmissionAsync(
+	public async Task<FormSubmissionOutput> IngestSubmissionAsync(
 		FunctionContext ctx,
 		[HttpTrigger(AuthorizationLevel.Function, "post", Route = "submission")] HttpRequest req
 	) {
 		if (ctx.GetAccessTokenId() is not { } accessTokenId || ctx.GetSourceId() is not { } sourceId)
 		{
-			return new UnauthorizedResult();
+			return new(new UnauthorizedResult());
 		}
 		
 		/*
@@ -137,7 +138,7 @@ public sealed class FormSubmissionFunctions
 
 			if (formTemplateId == Guid.Empty)
 			{
-				return new BadRequestResult();
+				return new(new BadRequestResult());
 			}
 			
 			submissionDto = new()
@@ -164,10 +165,22 @@ public sealed class FormSubmissionFunctions
 		
 		if (submissionDto is null)
 		{
-			return new BadRequestResult();
+			return new(new BadRequestResult());
 		}
 		
 		FormSubmission created = await _service.AddAsync(submissionDto.Adapt<FormSubmission>(), ctx.CancellationToken);
-		return new CreatedResult($"/api/submission/{created.Id}", created.Adapt<FormSubmissionDto>());
+		return new(
+			new CreatedResult($"/api/submission/{created.Id}", created.Adapt<FormSubmissionDto>()),
+			created.Adapt<FormSubmissionNotificationDto>()
+		);
 	}
+	
+	[UsedImplicitly]
+	public sealed record FormSubmissionOutput(
+		[property: HttpResult] 
+		IActionResult HttpResult,
+		
+		[property: ServiceBusOutput("submissions", EntityType = ServiceBusEntityType.Queue, Connection = "submissions-queue")]
+		FormSubmissionNotificationDto? MqNotification = null
+	);
 }

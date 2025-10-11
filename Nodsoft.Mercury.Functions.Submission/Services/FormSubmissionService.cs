@@ -14,17 +14,13 @@ namespace Nodsoft.Mercury.Functions.Submission.Services;
 public sealed class FormSubmissionService
 {
 	private readonly MercuryDbContext _context;
-	private readonly ServiceBusClient _client;
-	private readonly ILogger<FormSubmissionService> _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="FormSubmissionService"/> class.
 	/// </summary>
-	public FormSubmissionService(MercuryDbContext context, ServiceBusClient client, ILogger<FormSubmissionService> logger)
+	public FormSubmissionService(MercuryDbContext context)
 	{
 		_context = context;
-		_client = client;
-		_logger = logger;
 	}
 	
 	/// <summary>
@@ -65,35 +61,6 @@ public sealed class FormSubmissionService
 
 		_context.Submissions.Add(submission);
 		await _context.SaveChangesAsync(ct);
-
-		try
-		{
-			ServiceBusSender? sender = _client.CreateSender("submissions");
-
-			// Send message to Service Bus queue
-			FormSubmissionNotificationDto notification = new()
-			{
-				Id = submission.Id,
-				FormSourceId = submission.FormSourceId,
-				FormTemplateId = submission.FormTemplateId,
-				Created = submission.Created,
-				SubmittedBy = submission.SubmittedBy
-			};
-
-			ServiceBusMessage message = new(JsonSerializer.Serialize(notification))
-			{
-				ContentType = "application/json",
-				Subject = "new_submission",
-				MessageId = submission.Id.ToString(),
-			};
-
-			await sender.SendMessageAsync(message, ct);
-		}
-		catch (Exception e)
-		{
-			_logger.LogError(e, "Error sending message to Service Bus");
-			throw;
-		}
 
 		return submission;
 	}
