@@ -29,5 +29,6 @@ builder.Services.AddScoped<SubmissionNotificationService>();
 
 builder.Services.AddScoped<INotificationService<FormSubmissionNotificationDto, FormSubmission, SubmissionNotificationOptions>, EmailNotificationService>();
 builder.Services.AddScoped<INotificationService<FormSubmissionNotificationDto, FormSubmission, SubmissionNotificationOptions>, DiscordWebhookNotificationService>();
+builder.Services.AddScoped<INotificationService<FormSubmissionNotificationDto, FormSubmission, SubmissionNotificationOptions>, FreeMobileSelfNotificationService>();
 
 builder.Build().Run();
