@@ -1,6 +1,4 @@
-﻿using TextPress;
-
-namespace Nodsoft.Mercury.Data.Models.Notifications;
+﻿namespace Nodsoft.Mercury.Data.Models.Notifications;
 
 /// <summary>
 /// Defines options for sending email notifications.
@@ -16,6 +14,11 @@ public sealed record NotificationEmailOptions
 	/// The port to use for sending email notifications.
 	/// </summary>
 	public required ushort SmtpPort { get; init; }
+	
+	/// <summary>
+	/// Whether to use SSL for sending email notifications.
+	/// </summary>
+	public required bool SmtpUseSsl { get; init; } = true;
 	
 	/// <summary>
 	/// The username to use for sending email notifications.
