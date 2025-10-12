@@ -11,7 +11,7 @@ FunctionsApplicationBuilder builder = FunctionsApplication.CreateBuilder(args);
 builder.ConfigureFunctionsWebApplication();
 
 builder.AddCosmosDbContext<MercuryDbContext>("forms-db", "forms-db");
-builder.AddAzureServiceBusClient("submissions-queue");
+// builder.AddAzureServiceBusClient("submissions-queue");
 
 builder.Services.AddApplicationInsightsTelemetryWorkerService();
 builder.Services.ConfigureFunctionsApplicationInsights();

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Nodsoft.Mercury.Data.Models.Notifications;
 
 namespace Nodsoft.Mercury.Data.Models;
 
@@ -43,4 +44,9 @@ public sealed record FormSource : CosmosModelBase<Guid>
 	/// The access tokens for this form source.
 	/// </summary>
 	public List<FormAccessToken> AccessTokens { get; set; } = [];
+	
+	/// <summary>
+	/// The notification options for each new related form submission.
+	/// </summary>
+	public SubmissionNotificationOptions SubmissionNotificationOptions { get; set; } = new();
 }

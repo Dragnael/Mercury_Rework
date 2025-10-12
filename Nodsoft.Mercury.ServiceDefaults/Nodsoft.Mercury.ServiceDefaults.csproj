@@ -16,19 +16,19 @@
 		<PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
 
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.9.0" />
-		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.4.2" />
+		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.5.1" />
 
 		<PackageReference Include="OpenIddict.Validation.AspNetCore" Version="7.1.0" />
 
-		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
-		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.13.1" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.13.1" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
 
 		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 		<PackageReference Include="Serilog.Enrichers.AspNetCore.HttpContext" Version="1.0.1" />
-		<PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.4.0" />
+		<PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.5.0" />
 		<PackageReference Include="Serilog.Enrichers.Context" Version="4.6.5" />
 		<PackageReference Include="Serilog.Enrichers.Demystifier" Version="1.0.3" />
 		<PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />

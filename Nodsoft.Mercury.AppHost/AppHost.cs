@@ -13,6 +13,7 @@ IResourceBuilder<AzureCosmosDBResource> cosmos = builder.AddAzureCosmosDB("cosmo
 	{
 		emulator.WithDataVolume();
 		emulator.WithDataExplorer();
+		emulator.WithLifetime(ContainerLifetime.Persistent);
 	});
 
 IResourceBuilder<AzureCosmosDBDatabaseResource> formsDb = cosmos.AddCosmosDatabase("forms-db");
