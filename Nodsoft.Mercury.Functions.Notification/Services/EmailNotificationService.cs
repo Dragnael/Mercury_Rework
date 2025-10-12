@@ -40,11 +40,13 @@ public sealed class EmailNotificationService :
 	/// <returns>A task representing the asynchronous operation.</returns>
 	public async ValueTask SendAsync(FormSubmissionNotificationDto notification, FormSubmission submission, SubmissionNotificationOptions options, CancellationToken ct = default)
 	{
+		FormSource source = await _context.Sources.FirstAsync(s => s.Id == submission.FormSourceId, ct);
+		
 		using (_logger.BeginScope("Sending email notifications for submission {SubmissionId}", submission.Id))
 		{
-			foreach (NotificationEmailOptions emailOpt in options.EmailOptions)
+			foreach (EmailNotificationOptions emailOpt in options.EmailOptions)
 			{
-				await SendAsync(notification, submission, emailOpt, ct);
+				await SendAsync(notification, source, submission, emailOpt, ct);
 			}
 		}
 	}
@@ -53,9 +55,8 @@ public sealed class EmailNotificationService :
 	public ValueTask<bool> CanSendAsync(SubmissionNotificationOptions config, CancellationToken ct = default) => new(config.EmailOptions is { Count: > 0 });
 	
 	
-	private async ValueTask SendAsync(FormSubmissionNotificationDto notification, FormSubmission submission, NotificationEmailOptions options, CancellationToken ct = default)
+	private async ValueTask SendAsync(FormSubmissionNotificationDto notification, FormSource source, FormSubmission submission, EmailNotificationOptions options, CancellationToken ct = default)
 	{
-		FormSource source = await _context.Sources.FirstAsync(s => s.Id == submission.FormSourceId, ct);
 		Dictionary<string, string> templateDict = GetTemplateDictionary(source, submission);
 		
 		string subject = StringTemplate.Default.Fill(options.SubjectTemplate, templateDict);

@@ -8,5 +8,10 @@ public sealed record SubmissionNotificationOptions
 	/// <summary>
 	/// The email options to use for sending notifications.
 	/// </summary>
-	public List<NotificationEmailOptions> EmailOptions { get; set; } = [];
+	public List<EmailNotificationOptions> EmailOptions { get; set; } = [];
+
+	/// <summary>
+	/// The Discord Webhook configurations to use for sending notifications.
+	/// </summary>
+	public List<DiscordWebhookNotificationOptions> DiscordWebhookOptions { get; set; } = [];
 }

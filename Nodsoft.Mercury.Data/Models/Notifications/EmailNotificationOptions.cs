@@ -3,7 +3,7 @@
 /// <summary>
 /// Defines options for sending email notifications.
 /// </summary>
-public sealed record NotificationEmailOptions
+public sealed record EmailNotificationOptions
 {
 	/// <summary>
 	/// The SMTP server to use for sending email notifications.

@@ -28,5 +28,6 @@ builder.Services.AddScoped<NotificationConfigurationService>();
 builder.Services.AddScoped<SubmissionNotificationService>();
 
 builder.Services.AddScoped<INotificationService<FormSubmissionNotificationDto, FormSubmission, SubmissionNotificationOptions>, EmailNotificationService>();
+builder.Services.AddScoped<INotificationService<FormSubmissionNotificationDto, FormSubmission, SubmissionNotificationOptions>, DiscordWebhookNotificationService>();
 
 builder.Build().Run();
