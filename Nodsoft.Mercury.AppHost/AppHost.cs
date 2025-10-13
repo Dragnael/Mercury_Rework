@@ -3,6 +3,7 @@ using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
+// Enable Azure provisioning for deployment
 var azure = builder.AddAzureProvisioning();
 
 IResourceBuilder<AzureStorageResource> bulkStore = builder.AddAzureStorage("bulk-storage")
@@ -29,6 +30,7 @@ IResourceBuilder<AzureServiceBusResource> notificationsMq = builder.AddAzureServ
 
 IResourceBuilder<AzureServiceBusQueueResource> submissionsQueue = notificationsMq.AddServiceBusQueue("submissions-queue", "submissions");
 
+// Azure Functions configuration
 IResourceBuilder<AzureFunctionsProjectResource> submissionsFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions_Submission>("submissions-func")
 	.WithReference(formsDb).WaitFor(formsDb)
 	.WithReference(submissionsQueue).WaitFor(submissionsQueue)
@@ -37,4 +39,5 @@ IResourceBuilder<AzureFunctionsProjectResource> submissionsFunc = builder.AddAzu
 IResourceBuilder<AzureFunctionsProjectResource> notificationsFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions_Notification>("notifications-func")
 	.WithReference(formsDb).WaitFor(formsDb)
 	.WithReference(notificationsMq).WaitFor(notificationsMq);
+
 builder.Build().Run();
