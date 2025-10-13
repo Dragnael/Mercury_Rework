@@ -44,10 +44,10 @@ RESOURCES=$(az resource list --resource-group "$RESOURCE_GROUP" --query "[].{Nam
 # Function to check resource
 check_resource() {
     local type=$1
-    local name_pattern=$2
-    local display_name=$3
+    local display_name=$2
+    local count
     
-    local count=$(echo "$RESOURCES" | jq -r "[.[] | select(.Type | contains(\"$type\"))] | length")
+    count=$(echo "$RESOURCES" | jq -r "[.[] | select(.Type | contains(\"$type\"))] | length")
     
     if [ "$count" -gt 0 ]; then
         echo -e "${GREEN}✓ $display_name found ($count)${NC}"
@@ -61,15 +61,15 @@ check_resource() {
 
 # Validate each resource type
 echo ""
-check_resource "Microsoft.Web/sites" "func" "Function Apps"
+check_resource "Microsoft.Web/sites" "Function Apps"
 echo ""
-check_resource "Microsoft.DocumentDB/databaseAccounts" "cosmos" "Cosmos DB Account"
+check_resource "Microsoft.DocumentDB/databaseAccounts" "Cosmos DB Account"
 echo ""
-check_resource "Microsoft.ServiceBus/namespaces" "sb" "Service Bus Namespace"
+check_resource "Microsoft.ServiceBus/namespaces" "Service Bus Namespace"
 echo ""
-check_resource "Microsoft.Storage/storageAccounts" "st" "Storage Account"
+check_resource "Microsoft.Storage/storageAccounts" "Storage Account"
 echo ""
-check_resource "Microsoft.Insights/components" "ai" "Application Insights"
+check_resource "Microsoft.Insights/components" "Application Insights"
 echo ""
 
 # Get Function App URLs
