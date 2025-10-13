@@ -1,0 +1,58 @@
+<Project>
+	<PropertyGroup>
+		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<PackageVersion Include="Aspire.Azure.Messaging.ServiceBus" Version="9.5.1" />
+		<PackageVersion Include="Aspire.Microsoft.EntityFrameworkCore.Cosmos" Version="9.5.1" />
+		
+		<PackageVersion Include="Aspire.Hosting.AppHost" Version="9.5.1" />
+		<PackageVersion Include="Aspire.Hosting.Azure.CosmosDB" Version="9.5.1" />
+		<PackageVersion Include="Aspire.Hosting.Azure.Functions" Version="9.5.1-preview.1.25502.11" />
+		<PackageVersion Include="Aspire.Hosting.Azure.ServiceBus" Version="9.5.1" />
+
+		<PackageVersion Include="Discord.Net.Webhook" Version="3.18.0" />
+		<PackageVersion Include="FluentEmail.Smtp" Version="3.0.2" />
+		<PackageVersion Include="JetBrains.Annotations" Version="2025.2.2" />
+
+		<PackageVersion Include="Mapster" Version="7.4.0" />
+		<PackageVersion Include="Mapster.DependencyInjection" Version="1.0.1" />
+		
+		<PackageVersion Include="Microsoft.ApplicationInsights.WorkerService" Version="2.23.0" />
+
+		<PackageVersion Include="Microsoft.Azure.Functions.Analyzers" Version="1.0.0" />
+		<PackageVersion Include="Microsoft.Azure.Functions.Worker" Version="2.50.0-preview1" />
+		<PackageVersion Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.0.0" />
+		<PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.0.2" />
+		<PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="5.24.0" />
+		<PackageVersion Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.5" />
+		
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.0-rc.1.25451.107" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Analyzers" Version="10.0.0-rc.1.25451.107" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Cosmos" Version="10.0.0-rc.1.25451.107" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0-rc.1.25451.107" />
+
+		<PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.9.0" />
+		<PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.5.1" />
+
+		<PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.13.1" />
+		<PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.13.1" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
+
+		<PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+		<PackageVersion Include="Serilog.Enrichers.AspNetCore.HttpContext" Version="1.0.1" />
+		<PackageVersion Include="Serilog.Enrichers.ClientInfo" Version="2.5.0" />
+		<PackageVersion Include="Serilog.Enrichers.Context" Version="4.6.5" />
+		<PackageVersion Include="Serilog.Enrichers.Demystifier" Version="1.0.3" />
+		<PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+		<PackageVersion Include="Serilog.Enrichers.Process" Version="3.0.0" />
+		<PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+		<PackageVersion Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
+		
+		<PackageVersion Include="TextPress" Version="1.0.0" />
+		<PackageVersion Include="Throw" Version="1.4.0" />
+	</ItemGroup>
+</Project>

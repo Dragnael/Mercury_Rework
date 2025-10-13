@@ -3,6 +3,8 @@ using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
+var azure = builder.AddAzureProvisioning();
+
 IResourceBuilder<AzureStorageResource> bulkStore = builder.AddAzureStorage("bulk-storage")
 	.RunAsEmulator();
 
@@ -19,9 +21,6 @@ IResourceBuilder<AzureCosmosDBResource> cosmos = builder.AddAzureCosmosDB("cosmo
 IResourceBuilder<AzureCosmosDBDatabaseResource> formsDb = cosmos.AddCosmosDatabase("forms-db");
 #pragma warning restore ASPIRECOSMOSDB001
 
-IResourceBuilder<AzureStorageResource> opsStore = builder.AddAzureStorage("ops-storage")
-	.RunAsEmulator();
-
 IResourceBuilder<AzureServiceBusResource> notificationsMq = builder.AddAzureServiceBus("notifications-mq")
 	.RunAsEmulator(e =>
 	{
@@ -33,12 +32,9 @@ IResourceBuilder<AzureServiceBusQueueResource> submissionsQueue = notificationsM
 IResourceBuilder<AzureFunctionsProjectResource> submissionsFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions_Submission>("submissions-func")
 	.WithReference(formsDb).WaitFor(formsDb)
 	.WithReference(submissionsQueue).WaitFor(submissionsQueue)
-	.WithExternalHttpEndpoints()
-	.WithHostStorage(opsStore);
+	.WithExternalHttpEndpoints();
 
 IResourceBuilder<AzureFunctionsProjectResource> notificationsFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions_Notification>("notifications-func")
 	.WithReference(formsDb).WaitFor(formsDb)
-	.WithReference(notificationsMq).WaitFor(notificationsMq)
-	.WithHostStorage(opsStore);
-
+	.WithReference(notificationsMq).WaitFor(notificationsMq);
 builder.Build().Run();

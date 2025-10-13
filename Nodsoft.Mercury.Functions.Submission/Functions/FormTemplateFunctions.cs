@@ -1,5 +1,4 @@
-﻿using System.Web.Http;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -74,7 +73,7 @@ public sealed class FormTemplateFunctions
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Error creating form template");
-			return new InternalServerErrorResult();
+			throw;
 		}
 	}
 
@@ -114,7 +113,7 @@ public sealed class FormTemplateFunctions
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Error updating form template");
-			return new InternalServerErrorResult();
+			throw;
 		}
 	}
 

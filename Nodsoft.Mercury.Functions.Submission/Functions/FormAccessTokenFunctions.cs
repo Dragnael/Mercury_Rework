@@ -1,6 +1,6 @@
-﻿using System.Web.Http;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
@@ -92,7 +92,7 @@ public sealed class FormAccessTokenFunctions
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Error creating access token");
-			return new InternalServerErrorResult();
+			throw;
 		}
 	}
 

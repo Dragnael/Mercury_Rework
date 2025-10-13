@@ -1,5 +1,4 @@
-﻿using System.Web.Http;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -86,7 +85,7 @@ public sealed class FormSourceFunctions
 		catch (Exception e)
 		{
 			_logger.LogError(e, "Error creating form source");
-			return new InternalServerErrorResult();
+			throw;
 		}
 	}
 
@@ -130,7 +129,7 @@ public sealed class FormSourceFunctions
 		catch (Exception e)
 		{
 			_logger.LogError(e, "Error updating form source");
-			return new InternalServerErrorResult();
+			throw;
 		}
 	}
 
