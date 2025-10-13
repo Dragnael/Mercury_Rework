@@ -1,0 +1,59 @@
+name: Deploy to Azure with Aspire
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'live'
+        type: choice
+        options:
+          - live
+          - staging
+
+env:
+  AZURE_RESOURCE_GROUP: mercury-${{ github.event.inputs.environment || 'live' }}
+  AZURE_LOCATION: eastus
+
+jobs:
+  deploy-aspire:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: | 
+          9.0.x
+          10.0.x
+        dotnet-quality: 'preview'
+
+    - name: Install Aspire workload
+      run: |
+        dotnet workload install aspire
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Generate Aspire manifest
+      run: |
+        dotnet run --project ./Nodsoft.Mercury.AppHost/Nodsoft.Mercury.AppHost.csproj \
+          -- \
+          --publisher manifest \
+          --output-path ./aspire-manifest.json
+
+    - name: Deploy with Aspire
+      run: |
+        # This is a placeholder for Aspire deployment
+        # Once Aspire 9.x deployment tools mature, this will use:
+        # dotnet aspire deploy
+        echo "Aspire manifest generated at ./aspire-manifest.json"
+        echo "Please use the main deployment workflow for now."

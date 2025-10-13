@@ -1,0 +1,112 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: mercury-live
+  AZURE_LOCATION: eastus
+  DOTNET_VERSION: '9.0.x'
+  DOTNET_PREVIEW_VERSION: '10.0.x'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: | 
+          ${{ env.DOTNET_VERSION }}
+          ${{ env.DOTNET_PREVIEW_VERSION }}
+        dotnet-quality: 'preview'
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Create Resource Group
+      run: |
+        az group create \
+          --name ${{ env.AZURE_RESOURCE_GROUP }} \
+          --location ${{ env.AZURE_LOCATION }}
+
+    - name: Deploy Infrastructure
+      id: deploy
+      run: |
+        deploymentName="mercury-$(date +%Y%m%d-%H%M%S)"
+        az deployment group create \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+          --name "$deploymentName" \
+          --template-file ./infra/main.bicep \
+          --parameters ./infra/main.parameters.json
+        echo "deploymentName=$deploymentName" >> $GITHUB_OUTPUT
+
+    - name: Get Deployment Outputs
+      id: infra
+      run: |
+        outputs=$(az deployment group show \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+          --name "${{ steps.deploy.outputs.deploymentName }}" \
+          --query properties.outputs \
+          --output json)
+        
+        echo "submissionFuncName=$(echo $outputs | jq -r '.submissionFuncName.value')" >> $GITHUB_OUTPUT
+        echo "notificationFuncName=$(echo $outputs | jq -r '.notificationFuncName.value')" >> $GITHUB_OUTPUT
+        echo "cosmosDbEndpoint=$(echo $outputs | jq -r '.cosmosDbEndpoint.value')" >> $GITHUB_OUTPUT
+        echo "serviceBusNamespace=$(echo $outputs | jq -r '.serviceBusNamespace.value')" >> $GITHUB_OUTPUT
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build Submission Function
+      run: |
+        dotnet publish ./Nodsoft.Mercury.Functions.Submission/Nodsoft.Mercury.Functions.Submission.csproj \
+          --configuration Release \
+          --output ./publish/submission
+
+    - name: Build Notification Function
+      run: |
+        dotnet publish ./Nodsoft.Mercury.Functions.Notification/Nodsoft.Mercury.Functions.Notification.csproj \
+          --configuration Release \
+          --output ./publish/notification
+
+    - name: Deploy Submission Function
+      uses: Azure/functions-action@v1
+      with:
+        app-name: ${{ steps.infra.outputs.submissionFuncName }}
+        package: './publish/submission'
+
+    - name: Deploy Notification Function
+      uses: Azure/functions-action@v1
+      with:
+        app-name: ${{ steps.infra.outputs.notificationFuncName }}
+        package: './publish/notification'
+
+    - name: Configure Function App Settings
+      run: |
+        # Configure Submission Function
+        az functionapp config appsettings set \
+          --name ${{ steps.infra.outputs.submissionFuncName }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+          --settings \
+            "ConnectionStrings__forms-db=${{ steps.infra.outputs.cosmosDbEndpoint }}" \
+            "ConnectionStrings__submissions-queue=${{ steps.infra.outputs.serviceBusNamespace }}"
+        
+        # Configure Notification Function
+        az functionapp config appsettings set \
+          --name ${{ steps.infra.outputs.notificationFuncName }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+          --settings \
+            "ConnectionStrings__forms-db=${{ steps.infra.outputs.cosmosDbEndpoint }}" \
+            "ConnectionStrings__notifications-mq=${{ steps.infra.outputs.serviceBusNamespace }}"
