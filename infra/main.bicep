@@ -153,7 +153,7 @@ resource submissionFunc 'Microsoft.Web/sites@2023-12-01' = {
   properties: {
     serverFarmId: submissionPlan.id
     siteConfig: {
-      linuxFxVersion: 'DOTNET-ISOLATED|9.0'
+      linuxFxVersion: 'DOTNET-ISOLATED|10.0'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
@@ -200,7 +200,7 @@ resource notificationFunc 'Microsoft.Web/sites@2023-12-01' = {
   properties: {
     serverFarmId: notificationPlan.id
     siteConfig: {
-      linuxFxVersion: 'DOTNET-ISOLATED|9.0'
+      linuxFxVersion: 'DOTNET-ISOLATED|10.0'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'

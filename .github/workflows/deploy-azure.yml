@@ -9,8 +9,7 @@ on:
 env:
   AZURE_RESOURCE_GROUP: mercury-live
   AZURE_LOCATION: eastus
-  DOTNET_VERSION: '9.0.x'
-  DOTNET_PREVIEW_VERSION: '10.0.x'
+  DOTNET_VERSION: '10.0.x'
 
 jobs:
   build-and-deploy:
@@ -23,9 +22,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: | 
-          ${{ env.DOTNET_VERSION }}
-          ${{ env.DOTNET_PREVIEW_VERSION }}
+        dotnet-version: ${{ env.DOTNET_VERSION }}
         dotnet-quality: 'preview'
 
     - name: Azure Login

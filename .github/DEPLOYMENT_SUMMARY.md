@@ -57,8 +57,8 @@ All resources deployed to: **`mercury-live`** resource group
 
 | Resource | Type | Configuration |
 |----------|------|---------------|
-| Submission Function | Azure Functions | Flex Consumption, .NET 9.0 Isolated |
-| Notification Function | Azure Functions | Flex Consumption, .NET 9.0 Isolated |
+| Submission Function | Azure Functions | Flex Consumption, .NET 10.0 Isolated |
+| Notification Function | Azure Functions | Flex Consumption, .NET 10.0 Isolated |
 | Cosmos DB | Database | Serverless, NoSQL API |
 | Service Bus | Messaging | Standard tier, `submissions` queue |
 | Application Insights | Monitoring | Integrated with Log Analytics |
@@ -112,7 +112,7 @@ Clean up resources:
 
 1. **Code Push** → GitHub Actions triggered
 2. **Infrastructure Deployed** → Bicep templates create resources
-3. **Functions Built** → .NET 9.0/10.0 build
+3. **Functions Built** → .NET 10.0 build
 4. **Functions Deployed** → Zip deployment to Azure
 5. **Settings Configured** → Connection strings and app settings
 

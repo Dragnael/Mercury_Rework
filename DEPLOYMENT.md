@@ -39,7 +39,7 @@ All resources are deployed to a single resource group: **`mercury-live`**
 ### For Manual Deployment
 
 1. **Azure CLI**: [Install Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
-2. **.NET SDK**: .NET 9.0 or later
+2. **.NET SDK**: .NET 10.0 or later
 3. **Azure Subscription**: Active Azure subscription with appropriate permissions
 
 ## Quick Start
@@ -109,7 +109,7 @@ The automated CI/CD pipeline handles everything:
 
 **Steps:**
 1. Checkout code
-2. Setup .NET (9.0 and 10.0 preview)
+2. Setup .NET (10.0 preview)
 3. Login to Azure
 4. Deploy infrastructure (Bicep)
 5. Build Function Apps

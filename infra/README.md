@@ -102,7 +102,7 @@ az functionapp deployment source config-zip \
 Both Function Apps use the Flex Consumption plan which provides:
 - Pay-per-execution pricing
 - Automatic scaling
-- .NET 9.0 isolated worker runtime
+- .NET 10.0 isolated worker runtime
 - Linux-based hosting
 
 ### Cosmos DB - Serverless

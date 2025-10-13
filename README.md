@@ -39,7 +39,7 @@ Mercury is a serverless application built with .NET Aspire that handles form sub
 
 ## Technology Stack
 
-- **.NET 9.0/10.0**: Latest .NET runtime
+- **.NET 10.0**: Latest .NET runtime
 - **Azure Functions V4**: Isolated worker model
 - **Azure Cosmos DB**: NoSQL serverless database
 - **Azure Service Bus**: Message queue
@@ -50,7 +50,7 @@ Mercury is a serverless application built with .NET Aspire that handles form sub
 
 ### Prerequisites
 
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) or later
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or later
 - [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli)
 - [Azure subscription](https://azure.microsoft.com/free/)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop) (for local development)
@@ -220,7 +220,7 @@ az group delete --name mercury-live --yes
 
 ### Common Issues
 
-**Build Errors**: Ensure .NET 9.0/10.0 SDK is installed
+**Build Errors**: Ensure .NET 10.0 SDK is installed
 ```bash
 dotnet --list-sdks
 ```
