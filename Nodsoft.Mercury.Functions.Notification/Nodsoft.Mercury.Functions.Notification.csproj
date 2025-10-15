@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<AzureFunctionsVersion>V4</AzureFunctionsVersion>
+		<OutputType>Exe</OutputType>
+
+		<!-- https://github.com/Azure/azure-functions-host/issues/5756#issuecomment-599751436 -->
+		<_FunctionsSkipCleanOutput>true</_FunctionsSkipCleanOutput>
+		<ExcludeGeneratedDebugSymbol>false</ExcludeGeneratedDebugSymbol>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+		<PackageReference Include="Discord.Net.Webhook" />
+		<PackageReference Include="FluentEmail.Smtp" />
+		<PackageReference Include="Microsoft.ApplicationInsights.WorkerService" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" />
+		<PackageReference Include="TextPress" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Nodsoft.Mercury.Data\Nodsoft.Mercury.Data.csproj" />
+	  <ProjectReference Include="..\Nodsoft.Mercury.Models\Nodsoft.Mercury.Models.csproj" />
+	  <ProjectReference Include="..\Nodsoft.Mercury.ServiceDefaults\Nodsoft.Mercury.ServiceDefaults.csproj" />
+	</ItemGroup>
+
+</Project>

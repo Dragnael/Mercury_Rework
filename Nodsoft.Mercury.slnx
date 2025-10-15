@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="Nodsoft.Mercury.AppHost\Nodsoft.Mercury.AppHost.csproj" Type="Classic C#" />
+  <Project Path="Nodsoft.Mercury.Data\Nodsoft.Mercury.Data.csproj" Type="Classic C#" />
+  <Project Path="Nodsoft.Mercury.Functions.Notification\Nodsoft.Mercury.Functions.Notification.csproj" Type="Classic C#" />
+  <Project Path="Nodsoft.Mercury.Functions.Submission\Nodsoft.Mercury.Functions.Submission.csproj" Type="Classic C#" />
+  <Project Path="Nodsoft.Mercury.Models\Nodsoft.Mercury.Models.csproj" Type="Classic C#" />
+  <Project Path="Nodsoft.Mercury.ServiceDefaults\Nodsoft.Mercury.ServiceDefaults.csproj" Type="Classic C#" />
+</Solution>

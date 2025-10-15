@@ -1,0 +1,102 @@
+name: Validate Infrastructure
+
+on:
+  pull_request:
+    paths:
+      - 'infra/**'
+      - '.github/workflows/validate-infra.yml'
+  push:
+    paths:
+      - 'infra/**'
+      - '.github/workflows/validate-infra.yml'
+
+jobs:
+  validate-bicep:
+    name: Validate Bicep Templates
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Bicep CLI
+      run: |
+        # Install latest Bicep CLI
+        curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+        chmod +x ./bicep
+        sudo mv ./bicep /usr/local/bin/bicep
+        bicep --version
+
+    - name: Validate main.bicep
+      run: |
+        bicep build infra/main.bicep --stdout > /dev/null
+        echo "✓ Bicep template is valid"
+
+    - name: Build ARM template
+      run: |
+        bicep build infra/main.bicep --outfile infra/main.json
+        echo "✓ ARM template generated successfully"
+
+    - name: Display ARM template info
+      run: |
+        echo "ARM template size: $(stat -f%z infra/main.json 2>/dev/null || stat -c%s infra/main.json) bytes"
+        echo ""
+        echo "Resources defined:"
+        jq -r '.resources[] | "\(.type) - \(.name)"' infra/main.json | sort -u
+
+    - name: Validate ARM template (if Azure credentials available)
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      continue-on-error: true
+      run: |
+        # This step will only run on main branch and requires Azure credentials
+        if [ -n "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]; then
+          echo "Azure credentials found, performing deployment validation..."
+          az login --service-principal \
+            -u ${{ secrets.AZURE_CLIENT_ID }} \
+            -p ${{ secrets.AZURE_CLIENT_SECRET }} \
+            --tenant ${{ secrets.AZURE_TENANT_ID }}
+          
+          az deployment group validate \
+            --resource-group mercury-validation \
+            --template-file infra/main.bicep \
+            --parameters infra/main.parameters.json
+        else
+          echo "Azure credentials not available, skipping deployment validation"
+        fi
+
+  validate-workflows:
+    name: Validate GitHub Workflows
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Validate workflow syntax
+      run: |
+        # Check all workflow files for YAML syntax
+        for workflow in .github/workflows/*.yml; do
+          echo "Validating $workflow..."
+          python3 -c "import yaml; yaml.safe_load(open('$workflow'))"
+          echo "✓ $workflow is valid YAML"
+        done
+
+  lint-scripts:
+    name: Lint Shell Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install ShellCheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y shellcheck
+
+    - name: Lint bash scripts
+      run: |
+        find scripts -name "*.sh" -type f | while read script; do
+          echo "Linting $script..."
+          shellcheck "$script" || true
+        done

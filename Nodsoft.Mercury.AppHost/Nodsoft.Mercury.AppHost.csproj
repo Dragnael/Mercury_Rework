@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<Sdk Name="Aspire.AppHost.Sdk" Version="9.5.1" />
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<UserSecretsId>6425dff6-b35f-487d-8904-f5e88f170fca</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Aspire.Hosting.AppHost" />
+		<PackageReference Include="Aspire.Hosting.Azure.CosmosDB" />
+		<PackageReference Include="Aspire.Hosting.Azure.Functions" />
+		<PackageReference Include="Aspire.Hosting.Azure.ServiceBus" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Nodsoft.Mercury.Functions.Submission\Nodsoft.Mercury.Functions.Submission.csproj" />
+	  <ProjectReference Include="..\Nodsoft.Mercury.Functions.Notification\Nodsoft.Mercury.Functions.Notification.csproj" />
+	</ItemGroup>
+
+</Project>
