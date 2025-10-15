@@ -6,8 +6,6 @@ on:
       - 'infra/**'
       - '.github/workflows/validate-infra.yml'
   push:
-    branches:
-      - main
     paths:
       - 'infra/**'
       - '.github/workflows/validate-infra.yml'
