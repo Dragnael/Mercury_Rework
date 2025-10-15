@@ -9,15 +9,15 @@ param environment string = 'live'
 
 // Variables
 var uniqueSuffix = uniqueString(resourceGroup().id)
-var cosmosDbAccountName = '${namePrefix}-cosmos-${environment}-${uniqueSuffix}'
-var serviceBusNamespaceName = '${namePrefix}-sb-${environment}-${uniqueSuffix}'
-var storageAccountName = '${namePrefix}st${environment}${uniqueSuffix}'
-var appInsightsName = '${namePrefix}-ai-${environment}'
-var logAnalyticsName = '${namePrefix}-la-${environment}'
-var submissionFuncName = '${namePrefix}-submission-${environment}-${uniqueSuffix}'
-var notificationFuncName = '${namePrefix}-notification-${environment}-${uniqueSuffix}'
-var submissionPlanName = '${namePrefix}-submission-plan-${environment}'
-var notificationPlanName = '${namePrefix}-notification-plan-${environment}'
+var cosmosDbAccountName = 'cosmos-${namePrefix}-${environment}-${uniqueSuffix}'
+var serviceBusNamespaceName = 'mq-${namePrefix}-${environment}-${uniqueSuffix}'
+var storageAccountName = 'st${namePrefix}${environment}${uniqueSuffix}'
+var appInsightsName = 'appin-${namePrefix}-${environment}'
+var logAnalyticsName = 'logs-${namePrefix}-${environment}'
+var submissionFuncName = 'func-${namePrefix}-submission-${environment}-${uniqueSuffix}'
+var notificationFuncName = 'func-${namePrefix}-notification-${environment}-${uniqueSuffix}'
+var submissionPlanName = 'plan-${namePrefix}-submission-${environment}'
+var notificationPlanName = 'plan-${namePrefix}-notification-${environment}'
 
 // Log Analytics Workspace
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
@@ -99,8 +99,8 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview
   name: serviceBusNamespaceName
   location: location
   sku: {
-    name: 'Standard'
-    tier: 'Standard'
+    name: 'Basic'
+    tier: 'Basic'
   }
 }
 
