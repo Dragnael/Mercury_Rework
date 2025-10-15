@@ -1,0 +1,13 @@
+# Azure Developer CLI (azd) configuration
+name: mercury
+metadata:
+  template: mercury-aspire@0.0.1
+services:
+  submission-func:
+    project: ./Nodsoft.Mercury.Functions.Submission
+    language: dotnet
+    host: azurefunctions
+  notification-func:
+    project: ./Nodsoft.Mercury.Functions.Notification
+    language: dotnet
+    host: azurefunctions
