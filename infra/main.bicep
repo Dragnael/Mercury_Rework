@@ -20,7 +20,7 @@ var submissionPlanName = 'plan-${namePrefix}-submission-${environment}'
 var notificationPlanName = 'plan-${namePrefix}-notification-${environment}'
 
 // Log Analytics Workspace
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-02-01' = {
   name: logAnalyticsName
   location: location
   properties: {
@@ -43,11 +43,11 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 }
 
 // Storage Account
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   name: storageAccountName
   location: location
   sku: {
-    name: 'Standard_LRS'
+    name: 'StandardV2_LRS'
   }
   kind: 'StorageV2'
   properties: {
@@ -64,10 +64,6 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
   kind: 'GlobalDocumentDB'
   properties: {
     databaseAccountOfferType: 'Standard'
-    enableAutomaticFailover: false
-    consistencyPolicy: {
-      defaultConsistencyLevel: 'Session'
-    }
     locations: [
       {
         locationName: location
@@ -95,7 +91,7 @@ resource cosmosDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2024
 }
 
 // Service Bus Namespace
-resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
+resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' = {
   name: serviceBusNamespaceName
   location: location
   sku: {
@@ -105,22 +101,21 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview
 }
 
 // Service Bus Queue
-resource serviceBusQueue 'Microsoft.ServiceBus/namespaces/queues@2022-10-01-preview' = {
+resource serviceBusQueue 'Microsoft.ServiceBus/namespaces/queues@2024-01-01' = {
   parent: serviceBusNamespace
   name: 'submissions'
   properties: {
     lockDuration: 'PT5M'
-    maxSizeInMegabytes: 1024
     requiresDuplicateDetection: false
     requiresSession: false
-    defaultMessageTimeToLive: 'P14D'
+//     defaultMessageTimeToLive: 'P14D'
     deadLetteringOnMessageExpiration: true
     maxDeliveryCount: 10
   }
 }
 
 // App Service Plan for Submission Function (Flex Consumption)
-resource submissionPlan 'Microsoft.Web/serverfarms@2023-12-01' = {
+resource submissionPlan 'Microsoft.Web/serverfarms@2024-11-01' = {
   name: submissionPlanName
   location: location
   sku: {

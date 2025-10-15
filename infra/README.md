@@ -7,15 +7,15 @@ This directory contains the infrastructure-as-code (IaC) templates and CI/CD wor
 The deployment creates the following Azure resources in the `mercury-live` resource group:
 
 - **Azure Functions (Flex Consumption)**:
-  - `mercury-submission-live-{uniqueid}`: Handles form submissions
-  - `mercury-notification-live-{uniqueid}`: Handles notifications
+  - `func-mercury-submission-live-{uniqueid}`: Handles form submissions
+  - `func-mercury-notification-live-{uniqueid}`: Handles notifications
 
 - **Azure Cosmos DB (Serverless)**:
-  - Account: `mercury-cosmos-live-{uniqueid}`
+  - Account: `cosmos-mercury-live-{uniqueid}`
   - Database: `forms-db`
 
 - **Azure Service Bus**:
-  - Namespace: `mercury-sb-live-{uniqueid}`
+  - Namespace: `mq-mercury-live-{uniqueid}`
   - Queue: `submissions`
 
 - **Supporting Services**:
@@ -51,7 +51,7 @@ The deployment is automatically triggered on:
 - Manual trigger via GitHub Actions
 
 The workflow:
-1. Creates the `mercury-live` resource group in East US
+1. Creates the `mercury-live` resource group in France Central
 2. Deploys infrastructure using Bicep templates
 3. Builds and publishes both Function Apps
 4. Deploys Function Apps to Azure
