@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+permissions: 
+  id-token: write
+  contents: read
+
 env:
   AZURE_RESOURCE_GROUP: mercury-live
   AZURE_LOCATION: francecentral
