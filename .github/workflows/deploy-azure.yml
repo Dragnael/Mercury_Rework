@@ -45,12 +45,19 @@ jobs:
     - name: Deploy Infrastructure
       id: deploy
       run: |
+        set -e
         deploymentName="mercury-$(date +%Y%m%d-%H%M%S)"
-        az deployment group create \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+        echo "Starting deployment: $deploymentName"
+        deploymentResult=$(az deployment group create \
+          --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
           --name "$deploymentName" \
           --template-file ./infra/main.bicep \
-          --parameters ./infra/main.parameters.json
+          --parameters ./infra/main.parameters.json 2>&1) || {
+            echo "Azure deployment failed:"
+            echo "$deploymentResult"
+            exit 1
+        }
+        echo "$deploymentResult"
         echo "deploymentName=$deploymentName" >> $GITHUB_OUTPUT
 
     - name: Get Deployment Outputs
