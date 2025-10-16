@@ -11,7 +11,7 @@ param environment string = 'live'
 var uniqueSuffix = uniqueString(resourceGroup().id)
 var cosmosDbAccountName = 'cosmos-${namePrefix}-${environment}-${uniqueSuffix}'
 var serviceBusNamespaceName = 'mq-${namePrefix}-${environment}-${uniqueSuffix}'
-var storageAccountName = '${namePrefix}${environment}${uniqueSuffix}'
+var storageAccountName = toLower(substring('${namePrefix}${environment}${uniqueSuffix}', 0, 24))
 var appInsightsName = 'appin-${namePrefix}-${environment}'
 var logAnalyticsName = 'logs-${namePrefix}-${environment}'
 var submissionFuncName = 'func-${namePrefix}-submission-${environment}-${uniqueSuffix}'
@@ -47,7 +47,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   name: storageAccountName
   location: location
   sku: {
-    name: 'StandardV2_LRS'
+    name: 'Standard_LRS'
   }
   kind: 'StorageV2'
   properties: {
