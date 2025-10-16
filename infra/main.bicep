@@ -156,10 +156,9 @@ resource submissionFunc 'Microsoft.Web/sites@2024-11-01' = {
 				storage: {
 					authentication: {
 						type: 'SystemAssignedIdentity'
-						storageAccountConnectionStringName: 'AzureWebJobsStorage'
 					}
 					type: 'blobContainer'
-					value: '${storageAccount.properties.primaryEndpoints.blob}${submissionFuncName}'
+ 					value: '${storageAccount.properties.primaryEndpoints.blob}${submissionFuncName}'
 
 				}
 			}
@@ -220,10 +219,9 @@ resource notificationFunc 'Microsoft.Web/sites@2024-11-01' = {
 				storage: {
 					authentication: {
 						type: 'SystemAssignedIdentity'
-						storageAccountConnectionStringName: 'AzureWebJobsStorage'
 					}
 					type: 'blobContainer'
-					value: '${storageAccount.properties.primaryEndpoints.blob}${notificationFuncName}'
+ 					value: '${storageAccount.properties.primaryEndpoints.blob}${notificationFuncName}'
 				}
 			}
 		}
