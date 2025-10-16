@@ -108,7 +108,7 @@ resource serviceBusQueue 'Microsoft.ServiceBus/namespaces/queues@2024-01-01' = {
     lockDuration: 'PT5M'
     requiresDuplicateDetection: false
     requiresSession: false
-//     defaultMessageTimeToLive: 'P14D'
+    //     defaultMessageTimeToLive: 'P14D'
     deadLetteringOnMessageExpiration: true
     maxDeliveryCount: 10
   }
@@ -147,6 +147,12 @@ resource submissionFunc 'Microsoft.Web/sites@2023-12-01' = {
   kind: 'functionapp,linux'
   properties: {
     serverFarmId: submissionPlan.id
+    functionAppConfig: {
+      runtime: {
+				name: 'dotnet-isolated'
+				version: '10.0' 
+			}
+    }
     siteConfig: {
       linuxFxVersion: 'DOTNET-ISOLATED|10.0'
       appSettings: [
@@ -194,6 +200,12 @@ resource notificationFunc 'Microsoft.Web/sites@2023-12-01' = {
   kind: 'functionapp,linux'
   properties: {
     serverFarmId: notificationPlan.id
+		functionAppConfig: {
+			runtime: {
+				name: 'dotnet-isolated'
+				version: '10.0' 
+			}
+		}
     siteConfig: {
       linuxFxVersion: 'DOTNET-ISOLATED|10.0'
       appSettings: [
@@ -258,7 +270,10 @@ resource submissionServiceBusRoleAssignment 'Microsoft.Authorization/roleAssignm
   name: guid(serviceBusNamespace.id, submissionFunc.id, 'ServiceBusDataOwner')
   scope: serviceBusNamespace
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '090c5cfd-751d-490a-894a-3ce6f1109419')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '090c5cfd-751d-490a-894a-3ce6f1109419'
+    )
     principalId: submissionFunc.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -269,7 +284,10 @@ resource notificationServiceBusRoleAssignment 'Microsoft.Authorization/roleAssig
   name: guid(serviceBusNamespace.id, notificationFunc.id, 'ServiceBusDataOwner')
   scope: serviceBusNamespace
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '090c5cfd-751d-490a-894a-3ce6f1109419')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '090c5cfd-751d-490a-894a-3ce6f1109419'
+    )
     principalId: notificationFunc.identity.principalId
     principalType: 'ServicePrincipal'
   }
