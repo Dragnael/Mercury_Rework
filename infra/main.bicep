@@ -148,20 +148,22 @@ resource submissionFunc 'Microsoft.Web/sites@2024-11-01' = {
   properties: {
     serverFarmId: submissionPlan.id
     functionAppConfig: {
-			runtime: {
-				name: 'dotnet-isolated'
-				version: '10.0' 
-			}
-			deployment: {
-				storage: {
-					authentication: {
-						type: 'SystemAssignedIdentity'
-					}
-					type: 'blobContainer'
- 					value: '${storageAccount.properties.primaryEndpoints.blob}${submissionFuncName}'
-
-				}
-			}
+      runtime: {
+        name: 'dotnet-isolated'
+        version: '10.0'
+      }
+      deployment: {
+        storage: {
+          authentication: {
+            type: 'SystemAssignedIdentity'
+          }
+          type: 'blobContainer'
+          value: '${storageAccount.properties.primaryEndpoints.blob}${submissionFuncName}'
+        }
+      }
+      scaleAndConcurrency: {
+        instanceMemoryMB: 512
+      }
     }
     siteConfig: {
       linuxFxVersion: 'DOTNET-ISOLATED|10.0'
@@ -210,21 +212,24 @@ resource notificationFunc 'Microsoft.Web/sites@2024-11-01' = {
   kind: 'functionapp,linux'
   properties: {
     serverFarmId: notificationPlan.id
-		functionAppConfig: {
-			runtime: {
-				name: 'dotnet-isolated'
-				version: '10.0' 
-			}
-			deployment: {
-				storage: {
-					authentication: {
-						type: 'SystemAssignedIdentity'
-					}
-					type: 'blobContainer'
- 					value: '${storageAccount.properties.primaryEndpoints.blob}${notificationFuncName}'
-				}
-			}
-		}
+    functionAppConfig: {
+      runtime: {
+        name: 'dotnet-isolated'
+        version: '10.0'
+      }
+      deployment: {
+        storage: {
+          authentication: {
+            type: 'SystemAssignedIdentity'
+          }
+          type: 'blobContainer'
+          value: '${storageAccount.properties.primaryEndpoints.blob}${notificationFuncName}'
+        }
+      }
+      scaleAndConcurrency: {
+        instanceMemoryMB: 512
+      }
+    }
     siteConfig: {
       linuxFxVersion: 'DOTNET-ISOLATED|10.0'
       appSettings: [
