@@ -167,7 +167,6 @@ resource submissionFunc 'Microsoft.Web/sites@2024-11-01' = {
       }
     }
     siteConfig: {
-      linuxFxVersion: 'DOTNET-ISOLATED|10.0'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
@@ -233,7 +232,6 @@ resource notificationFunc 'Microsoft.Web/sites@2024-11-01' = {
       }
     }
     siteConfig: {
-      linuxFxVersion: 'DOTNET-ISOLATED|10.0'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
