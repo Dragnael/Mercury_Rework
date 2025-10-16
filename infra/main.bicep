@@ -159,6 +159,8 @@ resource submissionFunc 'Microsoft.Web/sites@2024-11-01' = {
 						storageAccountConnectionStringName: 'AzureWebJobsStorage'
 					}
 					type: 'blobContainer'
+					value: '${storageAccount.properties.primaryEndpoints.blob}${storageAccountName}'
+
 				}
 			}
     }
@@ -221,6 +223,7 @@ resource notificationFunc 'Microsoft.Web/sites@2024-11-01' = {
 						storageAccountConnectionStringName: 'AzureWebJobsStorage'
 					}
 					type: 'blobContainer'
+					value: '${storageAccount.properties.primaryEndpoints.blob}${storageAccountName}'
 				}
 			}
 		}
