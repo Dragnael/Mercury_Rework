@@ -141,16 +141,25 @@ resource notificationPlan 'Microsoft.Web/serverfarms@2023-12-01' = {
 }
 
 // Submission Function App
-resource submissionFunc 'Microsoft.Web/sites@2023-12-01' = {
+resource submissionFunc 'Microsoft.Web/sites@2024-11-01' = {
   name: submissionFuncName
   location: location
   kind: 'functionapp,linux'
   properties: {
     serverFarmId: submissionPlan.id
     functionAppConfig: {
-      runtime: {
+			runtime: {
 				name: 'dotnet-isolated'
 				version: '10.0' 
+			}
+			deployment: {
+				storage: {
+					authentication: {
+						type: 'SystemAssignedIdentity'
+						storageAccountConnectionStringName: 'AzureWebJobsStorage'
+					}
+					type: 'blobContainer'
+				}
 			}
     }
     siteConfig: {
@@ -194,7 +203,7 @@ resource submissionFunc 'Microsoft.Web/sites@2023-12-01' = {
 }
 
 // Notification Function App
-resource notificationFunc 'Microsoft.Web/sites@2023-12-01' = {
+resource notificationFunc 'Microsoft.Web/sites@2024-11-01' = {
   name: notificationFuncName
   location: location
   kind: 'functionapp,linux'
@@ -204,6 +213,15 @@ resource notificationFunc 'Microsoft.Web/sites@2023-12-01' = {
 			runtime: {
 				name: 'dotnet-isolated'
 				version: '10.0' 
+			}
+			deployment: {
+				storage: {
+					authentication: {
+						type: 'SystemAssignedIdentity'
+						storageAccountConnectionStringName: 'AzureWebJobsStorage'
+					}
+					type: 'blobContainer'
+				}
 			}
 		}
     siteConfig: {
