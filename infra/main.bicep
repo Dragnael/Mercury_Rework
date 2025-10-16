@@ -163,6 +163,7 @@ resource submissionFunc 'Microsoft.Web/sites@2024-11-01' = {
       }
       scaleAndConcurrency: {
         instanceMemoryMB: 512
+        maximumInstanceCount: 40
       }
     }
     siteConfig: {
@@ -228,6 +229,7 @@ resource notificationFunc 'Microsoft.Web/sites@2024-11-01' = {
       }
       scaleAndConcurrency: {
         instanceMemoryMB: 512
+        maximumInstanceCount: 40
       }
     }
     siteConfig: {
