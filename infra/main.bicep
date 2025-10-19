@@ -128,7 +128,7 @@ resource submissionPlan 'Microsoft.Web/serverfarms@2024-11-01' = {
 }
 
 // App Service Plan for Notification Function (Flex Consumption)
-resource notificationPlan 'Microsoft.Web/serverfarms@2023-12-01' = {
+resource notificationPlan 'Microsoft.Web/serverfarms@2024-11-01' = {
   name: notificationPlanName
   location: location
   sku: {
@@ -167,32 +167,7 @@ resource submissionFunc 'Microsoft.Web/sites@2024-11-01' = {
       }
     }
     siteConfig: {
-      appSettings: [
-        {
-          name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${az.environment().suffixes.storage}'
-        }
-        {
-          name: 'FUNCTIONS_EXTENSION_VERSION'
-          value: '~4'
-        }
-        {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: 'dotnet-isolated'
-        }
-        {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: appInsights.properties.ConnectionString
-        }
-        {
-          name: 'ConnectionStrings__forms-db'
-          value: cosmosDbAccount.properties.documentEndpoint
-        }
-        {
-          name: 'ConnectionStrings__submissions-queue'
-          value: '${serviceBusNamespace.name}.servicebus.windows.net'
-        }
-      ]
+      // appSettings moved to child resource submissionAppSettings
       cors: {
         allowedOrigins: ['*']
       }
@@ -202,6 +177,20 @@ resource submissionFunc 'Microsoft.Web/sites@2024-11-01' = {
   }
   identity: {
     type: 'SystemAssigned'
+  }
+}
+
+// Submission Function App settings moved to a child config resource
+resource submissionAppSettings 'Microsoft.Web/sites/config@2024-11-01' = {
+  parent: submissionFunc
+  name: 'appsettings'
+  properties: {
+    AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${az.environment().suffixes.storage}'
+    FUNCTIONS_EXTENSION_VERSION: '~4'
+    APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
+    'ConnectionStrings__forms-db': cosmosDbAccount.properties.documentEndpoint
+    AzureWebJobsServiceBus__fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
+    WEBSITE_RUN_FROM_PACKAGE: '1'
   }
 }
 
@@ -232,38 +221,30 @@ resource notificationFunc 'Microsoft.Web/sites@2024-11-01' = {
       }
     }
     siteConfig: {
-      appSettings: [
-        {
-          name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${az.environment().suffixes.storage}'
-        }
-        {
-          name: 'FUNCTIONS_EXTENSION_VERSION'
-          value: '~4'
-        }
-        {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: 'dotnet-isolated'
-        }
-        {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: appInsights.properties.ConnectionString
-        }
-        {
-          name: 'ConnectionStrings__forms-db'
-          value: cosmosDbAccount.properties.documentEndpoint
-        }
-        {
-          name: 'ConnectionStrings__notifications-mq'
-          value: '${serviceBusNamespace.name}.servicebus.windows.net'
-        }
-      ]
+      // appSettings moved to child resource notificationAppSettings
+      cors: {
+        allowedOrigins: ['*']
+      }
       use32BitWorkerProcess: false
     }
     httpsOnly: true
   }
   identity: {
     type: 'SystemAssigned'
+  }
+}
+
+// Notification Function App settings moved to a child config resource
+resource notificationAppSettings 'Microsoft.Web/sites/config@2024-11-01' = {
+  parent: notificationFunc
+  name: 'appsettings'
+  properties: {
+    AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${az.environment().suffixes.storage}'
+    FUNCTIONS_EXTENSION_VERSION: '~4'
+    APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
+    'ConnectionStrings__forms-db': cosmosDbAccount.properties.documentEndpoint
+    AzureWebJobsServiceBus__fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
+    WEBSITE_RUN_FROM_PACKAGE: '1'
   }
 }
 
