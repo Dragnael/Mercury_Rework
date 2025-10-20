@@ -19,24 +19,24 @@ IResourceBuilder<AzureCosmosDBResource> cosmos = builder.AddAzureCosmosDB("cosmo
 		emulator.WithLifetime(ContainerLifetime.Persistent);
 	});
 
-IResourceBuilder<AzureCosmosDBDatabaseResource> formsDb = cosmos.AddCosmosDatabase("forms-db");
+IResourceBuilder<AzureCosmosDBDatabaseResource> formsDb = cosmos.AddCosmosDatabase("formsdb");
 #pragma warning restore ASPIRECOSMOSDB001
 
-IResourceBuilder<AzureServiceBusResource> notificationsMq = builder.AddAzureServiceBus("notifications-mq")
+IResourceBuilder<AzureServiceBusResource> notificationsMq = builder.AddAzureServiceBus("notificationsmq")
 	.RunAsEmulator(e =>
 	{
 		e.WithLifetime(ContainerLifetime.Persistent);
 	});
 
-IResourceBuilder<AzureServiceBusQueueResource> submissionsQueue = notificationsMq.AddServiceBusQueue("submissions-queue", "submissions");
+IResourceBuilder<AzureServiceBusQueueResource> submissionsQueue = notificationsMq.AddServiceBusQueue("submissionsqueue", "submissions");
 
 // Azure Functions configuration
-IResourceBuilder<AzureFunctionsProjectResource> submissionsFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions_Submission>("submissions-func")
+IResourceBuilder<AzureFunctionsProjectResource> submissionsFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions_Submission>("submissionsfunc")
 	.WithReference(formsDb).WaitFor(formsDb)
 	.WithReference(submissionsQueue).WaitFor(submissionsQueue)
 	.WithExternalHttpEndpoints();
 
-IResourceBuilder<AzureFunctionsProjectResource> notificationsFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions_Notification>("notifications-func")
+IResourceBuilder<AzureFunctionsProjectResource> notificationsFunc = builder.AddAzureFunctionsProject<Nodsoft_Mercury_Functions_Notification>("notificationsfunc")
 	.WithReference(formsDb).WaitFor(formsDb)
 	.WithReference(notificationsMq).WaitFor(notificationsMq);
 

@@ -188,7 +188,7 @@ resource submissionAppSettings 'Microsoft.Web/sites/config@2024-11-01' = {
     AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${az.environment().suffixes.storage}'
     FUNCTIONS_EXTENSION_VERSION: '~4'
     APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
-    'ConnectionStrings__forms-db': cosmosDbAccount.properties.documentEndpoint
+    ConnectionStrings__formsdb: cosmosDbAccount.properties.documentEndpoint
     AzureWebJobsServiceBus__fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
     WEBSITE_RUN_FROM_PACKAGE: '1'
   }
@@ -242,7 +242,7 @@ resource notificationAppSettings 'Microsoft.Web/sites/config@2024-11-01' = {
     AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${az.environment().suffixes.storage}'
     FUNCTIONS_EXTENSION_VERSION: '~4'
     APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
-    'ConnectionStrings__forms-db': cosmosDbAccount.properties.documentEndpoint
+    ConnectionStrings__formsdb: cosmosDbAccount.properties.documentEndpoint
     AzureWebJobsServiceBus__fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
     WEBSITE_RUN_FROM_PACKAGE: '1'
   }
