@@ -16,18 +16,18 @@ env:
   DOTNET_VERSION: '10.0.x'
 
 jobs:
-  build-and-deploy:
+  infra:
     runs-on: ubuntu-latest
-    
+    # Expose deployment outputs as job outputs so dependent jobs can consume them
+    outputs:
+      submissionFuncName: ${{ steps.infra.outputs.submissionFuncName }}
+      notificationFuncName: ${{ steps.infra.outputs.notificationFuncName }}
+      cosmosDbEndpoint: ${{ steps.infra.outputs.cosmosDbEndpoint }}
+      serviceBusNamespace: ${{ steps.infra.outputs.serviceBusNamespace }}
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-        dotnet-quality: 'preview'
 
     - name: Azure Login
       uses: azure/login@v2
@@ -35,12 +35,6 @@ jobs:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-#    - name: Create Resource Group
-#      run: |
-#        az group create \
-#          --name ${{ env.AZURE_RESOURCE_GROUP }} \
-#          --location ${{ env.AZURE_LOCATION }}
 
     - name: Deploy Infrastructure
       id: deploy
@@ -75,6 +69,28 @@ jobs:
         echo "cosmosDbEndpoint=$(echo $outputs | jq -r '.cosmosDbEndpoint.value')" >> $GITHUB_OUTPUT
         echo "serviceBusNamespace=$(echo $outputs | jq -r '.serviceBusNamespace.value')" >> $GITHUB_OUTPUT
 
+  # Build & deploy the Submission Function app
+  submission-app:
+    needs: infra
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        dotnet-quality: 'preview'
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
     - name: Restore dependencies
       run: dotnet restore
 
@@ -84,38 +100,63 @@ jobs:
           --configuration Release \
           --output ./publish/submission
 
+    - name: Deploy Submission Function
+      uses: Azure/functions-action@v1
+      with:
+        app-name: ${{ needs.infra.outputs.submissionFuncName }}
+        package: './publish/submission'
+
+    - name: Configure Submission Function App Settings
+      run: |
+        az functionapp config appsettings set \
+          --name ${{ needs.infra.outputs.submissionFuncName }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+          --settings \
+            "ConnectionStrings__forms-db=${{ needs.infra.outputs.cosmosDbEndpoint }}" \
+            "ConnectionStrings__submissions-queue=${{ needs.infra.outputs.serviceBusNamespace }}"
+
+  # Build & deploy the Notification Function app
+  notification-app:
+    needs: infra
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        dotnet-quality: 'preview'
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+
     - name: Build Notification Function
       run: |
         dotnet publish ./Nodsoft.Mercury.Functions.Notification/Nodsoft.Mercury.Functions.Notification.csproj \
           --configuration Release \
           --output ./publish/notification
 
-    - name: Deploy Submission Function
-      uses: Azure/functions-action@v1
-      with:
-        app-name: ${{ steps.infra.outputs.submissionFuncName }}
-        package: './publish/submission'
-
     - name: Deploy Notification Function
       uses: Azure/functions-action@v1
       with:
-        app-name: ${{ steps.infra.outputs.notificationFuncName }}
+        app-name: ${{ needs.infra.outputs.notificationFuncName }}
         package: './publish/notification'
 
-    - name: Configure Function App Settings
+    - name: Configure Notification Function App Settings
       run: |
-        # Configure Submission Function
         az functionapp config appsettings set \
-          --name ${{ steps.infra.outputs.submissionFuncName }} \
+          --name ${{ needs.infra.outputs.notificationFuncName }} \
           --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --settings \
-            "ConnectionStrings__forms-db=${{ steps.infra.outputs.cosmosDbEndpoint }}" \
-            "ConnectionStrings__submissions-queue=${{ steps.infra.outputs.serviceBusNamespace }}"
-        
-        # Configure Notification Function
-        az functionapp config appsettings set \
-          --name ${{ steps.infra.outputs.notificationFuncName }} \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-          --settings \
-            "ConnectionStrings__forms-db=${{ steps.infra.outputs.cosmosDbEndpoint }}" \
-            "ConnectionStrings__notifications-mq=${{ steps.infra.outputs.serviceBusNamespace }}"
+            "ConnectionStrings__forms-db=${{ needs.infra.outputs.cosmosDbEndpoint }}" \
+            "ConnectionStrings__notifications-mq=${{ needs.infra.outputs.serviceBusNamespace }}"
