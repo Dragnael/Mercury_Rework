@@ -57,6 +57,26 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   }
 }
 
+// Blob containers for AzFunc stores
+resource submissionBlobs 'Microsoft.Storage/storageAccounts/blobServices/containers@2024-01-01' = {
+  name: '${storageAccountName}/default/${submissionFuncName}'
+  properties: {
+    publicAccess: 'None'
+  }
+  dependsOn: [
+    storageAccount
+  ]
+}
+resource notificationBlobs 'Microsoft.Storage/storageAccounts/blobServices/containers@2024-01-01' = {
+  name: '${storageAccountName}/default/${notificationFuncName}'
+  properties: {
+    publicAccess: 'None'
+  }
+  dependsOn: [
+    storageAccount
+  ]
+}
+
 // CosmosDB Account (Serverless)
 resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
   name: cosmosDbAccountName
