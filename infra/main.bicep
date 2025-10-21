@@ -248,6 +248,35 @@ resource notificationAppSettings 'Microsoft.Web/sites/config@2024-11-01' = {
   }
 }
 
+// Assign funcs appropriate roles to deploy to underlying storage
+// Assign Storage Blob Data Contributor role to Submission Function
+resource submissionStorageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(storageAccount.id, submissionFunc.id, 'StorageBlobDataContributor')
+  scope: storageAccount
+  properties: {
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+    )
+    principalId: submissionFunc.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Assign Storage Blob Data Contributor role to Notification Function
+resource notificationStorageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(storageAccount.id, notificationFunc.id, 'StorageBlobDataContributor')
+  scope: storageAccount
+  properties: {
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+    )
+    principalId: notificationFunc.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // Assign Cosmos DB Data Contributor role to Submission Function
 resource submissionCosmosRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' = {
   parent: cosmosDbAccount
