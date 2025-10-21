@@ -112,8 +112,8 @@ jobs:
           --name ${{ needs.infra.outputs.submissionFuncName }} \
           --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --settings \
-            "ConnectionStrings__forms-db=${{ needs.infra.outputs.cosmosDbEndpoint }}" \
-            "ConnectionStrings__submissions-queue=${{ needs.infra.outputs.serviceBusNamespace }}"
+            "ConnectionStrings__formsdb=${{ needs.infra.outputs.cosmosDbEndpoint }}" \
+            "ConnectionStrings__submissionsqueue=${{ needs.infra.outputs.serviceBusNamespace }}"
 
   # Build & deploy the Notification Function app
   notification-app:
@@ -158,5 +158,5 @@ jobs:
           --name ${{ needs.infra.outputs.notificationFuncName }} \
           --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
           --settings \
-            "ConnectionStrings__forms-db=${{ needs.infra.outputs.cosmosDbEndpoint }}" \
-            "ConnectionStrings__notifications-mq=${{ needs.infra.outputs.serviceBusNamespace }}"
+            "ConnectionStrings__formsdb=${{ needs.infra.outputs.cosmosDbEndpoint }}" \
+            "ConnectionStrings__notificationsmq=${{ needs.infra.outputs.serviceBusNamespace }}"
