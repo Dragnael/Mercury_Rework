@@ -205,12 +205,28 @@ resource submissionAppSettings 'Microsoft.Web/sites/config@2024-11-01' = {
   parent: submissionFunc
   name: 'appsettings'
   properties: {
-    AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${az.environment().suffixes.storage}'
+		OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: 'true'
+    OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: 'true'
+    OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: 'in_memory'
+    ASPNETCORE_FORWARDEDHEADERS_ENABLED: 'true'
+    AzureFunctionsJobHost__telemetryMode: 'OpenTelemetry'
+    Aspire__Azure__Storage__Blobs__AzureWebJobsStorage__ServiceUri: storageAccount.properties.primaryEndpoints.blob
+		Aspire__Azure__Storage__Queues__AzureWebJobsStorage__ServiceUri: storageAccount.properties.primaryEndpoints.queue
+		Aspire__Azure__Data__Tables__AzureWebJobsStorage__ServiceUri: storageAccount.properties.primaryEndpoints.table
+		Aspire__Microsoft__Azure__Cosmos__formsdb__AccountEndpoint: cosmosDbAccount.properties.documentEndpoint
+		Aspire__Microsoft__Azure__Cosmos__formsdb__DatabaseName: 'formsdb'
+		Aspire__Microsoft__EntityFrameworkCore__Cosmos__formsdb__AccountEndpoint: cosmosDbAccount.properties.documentEndpoint
+		Aspire__Microsoft__EntityFrameworkCore__Cosmos__formsdb__DatabaseName: 'formsdb'
+		Aspire__Azure__Messaging__ServiceBus__submissionsqueue__FullyQualifiedNamespace: serviceBusNamespace.properties.serviceBusEndpoint
+		Aspire__Azure__Messaging__ServiceBus__submissionsqueue__QueueOrTopicName: 'submissions'
+    AzureWebJobsStorage__accountName: storageAccount.name
+    AzureWebJobsStorage__blobServiceUri: storageAccount.properties.primaryEndpoints.blob
+    AzureWebJobsStorage__queueServiceUri: storageAccount.properties.primaryEndpoints.queue
+    AzureWebJobsStorage__tableServiceUri: storageAccount.properties.primaryEndpoints.table
+    formsdb__accountEndpoint: cosmosDbAccount.properties.documentEndpoint
     FUNCTIONS_EXTENSION_VERSION: '~4'
     APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
     ConnectionStrings__formsdb: cosmosDbAccount.properties.documentEndpoint
-    AzureWebJobsServiceBus__fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
-//     WEBSITE_RUN_FROM_PACKAGE: '1'
   }
 }
 
@@ -259,12 +275,28 @@ resource notificationAppSettings 'Microsoft.Web/sites/config@2024-11-01' = {
   parent: notificationFunc
   name: 'appsettings'
   properties: {
-    AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${az.environment().suffixes.storage}'
+		OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: 'true'
+    OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: 'true'
+    OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: 'in_memory'
+    ASPNETCORE_FORWARDEDHEADERS_ENABLED: 'true'
+    AzureFunctionsJobHost__telemetryMode: 'OpenTelemetry'
+    Aspire__Azure__Storage__Blobs__AzureWebJobsStorage__ServiceUri: storageAccount.properties.primaryEndpoints.blob
+		Aspire__Azure__Storage__Queues__AzureWebJobsStorage__ServiceUri: storageAccount.properties.primaryEndpoints.queue
+		Aspire__Azure__Data__Tables__AzureWebJobsStorage__ServiceUri: storageAccount.properties.primaryEndpoints.table
+		Aspire__Microsoft__Azure__Cosmos__formsdb__AccountEndpoint: cosmosDbAccount.properties.documentEndpoint
+		Aspire__Microsoft__Azure__Cosmos__formsdb__DatabaseName: 'formsdb'
+		Aspire__Microsoft__EntityFrameworkCore__Cosmos__formsdb__AccountEndpoint: cosmosDbAccount.properties.documentEndpoint
+		Aspire__Microsoft__EntityFrameworkCore__Cosmos__formsdb__DatabaseName: 'formsdb'
+		Aspire__Azure__Messaging__ServiceBus__submissionsqueue__FullyQualifiedNamespace: serviceBusNamespace.properties.serviceBusEndpoint
+		Aspire__Azure__Messaging__ServiceBus__submissionsqueue__QueueOrTopicName: 'submissions'
+    AzureWebJobsStorage__accountName: storageAccount.name
+    AzureWebJobsStorage__blobServiceUri: storageAccount.properties.primaryEndpoints.blob
+    AzureWebJobsStorage__queueServiceUri: storageAccount.properties.primaryEndpoints.queue
+    AzureWebJobsStorage__tableServiceUri: storageAccount.properties.primaryEndpoints.table
+    formsdb__accountEndpoint: cosmosDbAccount.properties.documentEndpoint
     FUNCTIONS_EXTENSION_VERSION: '~4'
     APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
     ConnectionStrings__formsdb: cosmosDbAccount.properties.documentEndpoint
-    AzureWebJobsServiceBus__fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
-//     WEBSITE_RUN_FROM_PACKAGE: '1'
   }
 }
 
