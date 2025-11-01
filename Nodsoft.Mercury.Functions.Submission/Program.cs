@@ -6,6 +6,8 @@ using Nodsoft.Mercury.Data;
 using Nodsoft.Mercury.Functions.Submission.Services;
 using Nodsoft.Mercury.Functions.Submission.Services.Middlewares;
 
+Console.WriteLine("NSYS Mercury - Submission API");
+
 FunctionsApplicationBuilder builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();

@@ -8,6 +8,8 @@ using Nodsoft.Mercury.Data.Models.Notifications;
 using Nodsoft.Mercury.Functions.Notification.Services;
 using Nodsoft.Mercury.Models;
 
+Console.WriteLine("NSYS Mercury - Notification API");
+
 var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.AddCosmosDbContext<MercuryDbContext>("formsdb", "forms-db");
