@@ -188,6 +188,8 @@ resource submissionFunc 'Microsoft.Web/sites@2024-11-01' = {
     }
     siteConfig: {
       // appSettings moved to child resource submissionAppSettings
+			minTlsVersion: '1.2'
+			http20Enabled: true
       cors: {
         allowedOrigins: ['*']
       }
@@ -225,6 +227,7 @@ resource submissionAppSettings 'Microsoft.Web/sites/config@2024-11-01' = {
     AzureWebJobsStorage__tableServiceUri: storageAccount.properties.primaryEndpoints.table
     formsdb__accountEndpoint: cosmosDbAccount.properties.documentEndpoint
     FUNCTIONS_EXTENSION_VERSION: '~4'
+    APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
     APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
     ConnectionStrings__formsdb: cosmosDbAccount.properties.documentEndpoint
   }
