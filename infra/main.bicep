@@ -51,30 +51,37 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   }
   kind: 'StorageV2'
   properties: {
+		accessTier: 'Hot'
+		allowBlobPublicAccess: false
+		dnsEndpointType: 'Standard'
     minimumTlsVersion: 'TLS1_2'
-    allowBlobPublicAccess: false
-    supportsHttpsTrafficOnly: true
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Allow'
+    }  
+    publicNetworkAccess: 'Enabled'
   }
-}
 
-// Blob containers for AzFunc stores
-resource submissionBlobs 'Microsoft.Storage/storageAccounts/blobServices/containers@2024-01-01' = {
-  name: '${storageAccountName}/default/${submissionFuncName}'
-  properties: {
-    publicAccess: 'None'
-  }
-  dependsOn: [
-    storageAccount
-  ]
-}
-resource notificationBlobs 'Microsoft.Storage/storageAccounts/blobServices/containers@2024-01-01' = {
-  name: '${storageAccountName}/default/${notificationFuncName}'
-  properties: {
-    publicAccess: 'None'
-  }
-  dependsOn: [
-    storageAccount
-  ]
+	resource blobServices 'blobServices' = {
+		name: 'default'
+		properties: {
+			deleteRetentionPolicy: {}
+		}
+	
+		// Blob containers for AzFunc stores
+    resource submissionBlobs 'containers' = {
+      name: submissionFuncName
+      properties: {
+        publicAccess: 'None'
+      }
+    }
+    resource notificationBlobs 'containers' = {
+      name: notificationFuncName
+      properties: {
+        publicAccess: 'None'
+      }
+    }
+	}
 }
 
 // CosmosDB Account (Serverless)
@@ -97,17 +104,16 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
       }
     ]
   }
-}
 
 // CosmosDB Database
-resource cosmosDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2024-05-15' = {
-  parent: cosmosDbAccount
-  name: 'forms-db'
-  properties: {
-    resource: {
-      id: 'forms-db'
-    }
-  }
+	resource cosmosDatabase 'sqlDatabases' = {
+		name: 'forms-db'
+		properties: {
+			resource: {
+				id: 'forms-db'
+			}
+		}
+	}
 }
 
 // Service Bus Namespace
@@ -118,21 +124,22 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' = {
     name: 'Basic'
     tier: 'Basic'
   }
+
+	// Service Bus Queue
+	resource serviceBusQueue 'queues' = {
+		name: 'submissions'
+		properties: {
+			lockDuration: 'PT5M'
+			requiresDuplicateDetection: false
+			requiresSession: false
+			//     defaultMessageTimeToLive: 'P14D'
+			deadLetteringOnMessageExpiration: true
+			maxDeliveryCount: 10
+		}
+	}
 }
 
-// Service Bus Queue
-resource serviceBusQueue 'Microsoft.ServiceBus/namespaces/queues@2024-01-01' = {
-  parent: serviceBusNamespace
-  name: 'submissions'
-  properties: {
-    lockDuration: 'PT5M'
-    requiresDuplicateDetection: false
-    requiresSession: false
-    //     defaultMessageTimeToLive: 'P14D'
-    deadLetteringOnMessageExpiration: true
-    maxDeliveryCount: 10
-  }
-}
+
 
 // App Service Plan for Submission Function (Flex Consumption)
 resource submissionPlan 'Microsoft.Web/serverfarms@2024-11-01' = {
@@ -293,6 +300,7 @@ resource notificationAppSettings 'Microsoft.Web/sites/config@2024-11-01' = {
 		Aspire__Azure__Messaging__ServiceBus__submissionsqueue__FullyQualifiedNamespace: serviceBusNamespace.properties.serviceBusEndpoint
 		Aspire__Azure__Messaging__ServiceBus__submissionsqueue__QueueOrTopicName: 'submissions'
     AzureWebJobsStorage__accountName: storageAccount.name
+    AzureWebJobsStorage__credential: 'managedidentity'
     AzureWebJobsStorage__blobServiceUri: storageAccount.properties.primaryEndpoints.blob
     AzureWebJobsStorage__queueServiceUri: storageAccount.properties.primaryEndpoints.queue
     AzureWebJobsStorage__tableServiceUri: storageAccount.properties.primaryEndpoints.table
