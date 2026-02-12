@@ -1,9 +1,9 @@
-﻿using Mapster;
+﻿using System.ComponentModel.DataAnnotations;
+using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Nodsoft.Mercury.Data.Models;
 using Nodsoft.Mercury.Functions.Submission.Services;
 using Nodsoft.Mercury.Models;
@@ -11,153 +11,193 @@ using Nodsoft.Mercury.Models;
 namespace Nodsoft.Mercury.Functions.Submission.Functions;
 
 /// <summary>
-/// Represents functions for form sources.
+/// Represents HTTP functions used to manage form sources.
+/// Secure, Azure-ready, ASP.NET Core compatible and Aspire friendly.
 /// </summary>
 public sealed class FormSourceFunctions
 {
-	private readonly FormSourceService _service;
-	private readonly ILogger<FormSourceFunctions> _logger;
+    private readonly FormSourceService _service;
+    private readonly ILogger<FormSourceFunctions> _logger;
 
-	/// <summary>
-	/// Initializes a new instance of the <see cref="FormSourceFunctions"/> class.
-	/// </summary>
-	public FormSourceFunctions(FormSourceService service, ILogger<FormSourceFunctions> logger)
-	{
-		_service = service;
-		_logger = logger;
-	}
-	
-	/// <summary>
-	/// Gets a form source by its ID.
-	/// </summary>
-	/// <param name="req">The HTTP request.</param>
-	/// <param name="id">The ID of the form source.</param>
-	/// <returns>The form source with the specified ID if found.</returns>
-	[Function("GetSource")]
-	public async Task<IActionResult> GetSourceAsync([HttpTrigger(AuthorizationLevel.Function, "get", Route = "source/{id:guid}")] HttpRequest req, 
-		[FromRoute] Guid id
-	) {
-		if (await _service.GetFormSourceByIdAsync(id) is not { } source)
-		{
-			return new NotFoundResult();
-		}
-		
-		return new OkObjectResult(source.Adapt<FormSourceDto>());
-	}
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FormSourceFunctions"/> class.
+    /// </summary>
+    public FormSourceFunctions(
+        FormSourceService service,
+        ILogger<FormSourceFunctions> logger)
+    {
+        _service = service;
+        _logger = logger;
+    }
 
-	/// <summary>
-	/// Gets all form sources.
-	/// </summary>
-	/// <param name="req">The HTTP request.</param>
-	/// <returns>All form sources.</returns>
-	[Function("GetAllSources")]
-	public async Task<IActionResult> GetAllSourcesAsync([HttpTrigger(AuthorizationLevel.Function, "get", Route = "source")] HttpRequest req)
-	{
-		List<FormSource> sources = await _service.GetAllFormSourcesAsync();
-		return new OkObjectResult(sources.Select(s => s.Adapt<FormSourceDto>()));
-	}
+    /// <summary>
+    /// Gets a form source by its ID.
+    /// </summary>
+    [Function("GetSource")]
+    public async Task<IActionResult> GetSourceAsync(
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "source/{id:guid}")]
+        HttpRequest req,
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        if (!req.IsHttps)
+            return new StatusCodeResult(StatusCodes.Status403Forbidden);
 
-	/// <summary>
-	/// Creates a new form source.
-	/// </summary>
-	/// <param name="req">The HTTP request.</param>
-	/// <param name="sourceDto">The form source data to create.</param>
-	/// <returns>The created form source.</returns>
-	[Function("CreateSource")]
-	public async Task<IActionResult> CreateSourceAsync([HttpTrigger(AuthorizationLevel.Function, "post", Route = "source")] HttpRequest req) 
-	{
-		if (await req.ReadFromJsonAsync<FormSourceDto>() is not { } sourceDto)
-		{
-			return new BadRequestResult();
-		}
-		
-		try
-		{
-			FormSource source = sourceDto.Adapt<FormSource>();
-			FormSource createdSource = await _service.AddFormSourceAsync(source);
+        var source = await _service.GetFormSourceByIdAsync(id, cancellationToken);
 
-			return new CreatedResult($"/api/source/{createdSource.Id}", createdSource.Adapt<FormSourceDto>());
-		}
-		catch (JsonException)
-		{
-			return new BadRequestObjectResult("Invalid JSON format");
-		}
-		catch (Exception e)
-		{
-			_logger.LogError(e, "Error creating form source");
-			throw;
-		}
-	}
+        if (source is null)
+            return new NotFoundResult();
 
-	/// <summary>
-	/// Updates an existing form source.
-	/// </summary>
-	/// <param name="req">The HTTP request.</param>
-	/// <param name="id">The ID of the form source to update.</param>
-	/// <param name="sourceDto">The updated form source data.</param>
-	/// <returns>The updated form source.</returns>
-	[Function("UpdateSource")]
-	public async Task<IActionResult> UpdateSourceAsync([HttpTrigger(AuthorizationLevel.Function, "put", Route = "source/{id:guid}")] HttpRequest req,
-		[FromRoute] Guid id,
-		[FromBody] FormSourceDto? sourceDto
-	) {
-		if (sourceDto is null)
-		{
-			return new BadRequestResult();
-		}
-		
-		try
-		{
-			if (await _service.GetFormSourceByIdAsync(id) is not { } existingSource)
-			{
-				return new NotFoundResult();
-			}
+        return new OkObjectResult(source.Adapt<FormSourceDto>());
+    }
 
-			// Update the existing source with new values
-			existingSource.Name = sourceDto.Name;
-			existingSource.Url = sourceDto.Url;
-			existingSource.ContactEmail = sourceDto.ContactEmail;
+    /// <summary>
+    /// Gets all form sources.
+    /// </summary>
+    [Function("GetAllSources")]
+    public async Task<IActionResult> GetAllSourcesAsync(
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "source")]
+        HttpRequest req,
+        CancellationToken cancellationToken)
+    {
+        if (!req.IsHttps)
+            return new StatusCodeResult(StatusCodes.Status403Forbidden);
 
-			FormSource updatedSource = await _service.UpdateFormSourceAsync(existingSource);
+        var sources = await _service.GetAllFormSourcesAsync(cancellationToken);
 
-			return new OkObjectResult(updatedSource.Adapt<FormSourceDto>());
-		}
-		catch (JsonException)
-		{
-			return new BadRequestObjectResult("Invalid JSON format");
-		}
-		catch (Exception e)
-		{
-			_logger.LogError(e, "Error updating form source");
-			throw;
-		}
-	}
+        return new OkObjectResult(
+            sources.Select(s => s.Adapt<FormSourceDto>()));
+    }
 
-	/// <summary>
-	/// Deletes a form source by its ID.
-	/// </summary>
-	/// <param name="req">The HTTP request.</param>
-	/// <param name="id">The ID of the form source to delete.</param>
-	/// <returns>No content if successful, not found if the source doesn't exist.</returns>
-	[Function("DeleteSource")]
-	public async Task<IActionResult> DeleteSourceAsync([HttpTrigger(AuthorizationLevel.Function, "delete", Route = "source/{id:guid}")] HttpRequest req,
-		[FromRoute] Guid id
-	) {
-		try
-		{
-			bool deleted = await _service.DeleteFormSourceAsync(id);
+    /// <summary>
+    /// Creates a new form source.
+    /// Supports JSON and multipart/form-data.
+    /// </summary>
+    [Function("CreateSource")]
+    public async Task<IActionResult> CreateSourceAsync(
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "source")]
+        HttpRequest req,
+        CancellationToken cancellationToken)
+    {
+        if (!req.IsHttps)
+            return new StatusCodeResult(StatusCodes.Status403Forbidden);
 
-			if (!deleted)
-			{
-				return new NotFoundResult();
-			}
+        FormSourceDto? sourceDto;
 
-			return new NoContentResult();
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Error deleting form source");
-			return new StatusCodeResult(500);
-		}
-	}
+        if (req.HasFormContentType)
+        {
+            var form = await req.ReadFormAsync(cancellationToken);
+
+            sourceDto = new FormSourceDto
+            {
+                Name = form["Name"],
+                Url = form["Url"],
+                ContactEmail = form["ContactEmail"]
+            };
+        }
+        else
+        {
+            sourceDto = await req.ReadFromJsonAsync<FormSourceDto>(cancellationToken);
+        }
+
+        if (sourceDto is null)
+            return new BadRequestObjectResult("Invalid payload.");
+
+        // Basic validation
+        if (string.IsNullOrWhiteSpace(sourceDto.Name) ||
+            string.IsNullOrWhiteSpace(sourceDto.Url))
+        {
+            return new BadRequestObjectResult("Name and Url are required.");
+        }
+
+        if (!new EmailAddressAttribute().IsValid(sourceDto.ContactEmail))
+        {
+            return new BadRequestObjectResult("Invalid email format.");
+        }
+
+        try
+        {
+            var entity = sourceDto.Adapt<FormSource>();
+            var created = await _service.AddFormSourceAsync(entity, cancellationToken);
+
+            return new CreatedResult(
+                $"/api/source/{created.Id}",
+                created.Adapt<FormSourceDto>());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while creating form source");
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    /// <summary>
+    /// Updates an existing form source.
+    /// </summary>
+    [Function("UpdateSource")]
+    public async Task<IActionResult> UpdateSourceAsync(
+        [HttpTrigger(AuthorizationLevel.Function, "put", Route = "source/{id:guid}")]
+        HttpRequest req,
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        if (!req.IsHttps)
+            return new StatusCodeResult(StatusCodes.Status403Forbidden);
+
+        var sourceDto = await req.ReadFromJsonAsync<FormSourceDto>(cancellationToken);
+
+        if (sourceDto is null)
+            return new BadRequestResult();
+
+        var existing = await _service.GetFormSourceByIdAsync(id, cancellationToken);
+
+        if (existing is null)
+            return new NotFoundResult();
+
+        existing.Name = sourceDto.Name;
+        existing.Url = sourceDto.Url;
+        existing.ContactEmail = sourceDto.ContactEmail;
+
+        try
+        {
+            var updated = await _service.UpdateFormSourceAsync(existing, cancellationToken);
+
+            return new OkObjectResult(updated.Adapt<FormSourceDto>());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating form source {SourceId}", id);
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    /// <summary>
+    /// Deletes a form source by its ID.
+    /// </summary>
+    [Function("DeleteSource")]
+    public async Task<IActionResult> DeleteSourceAsync(
+        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "source/{id:guid}")]
+        HttpRequest req,
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        if (!req.IsHttps)
+            return new StatusCodeResult(StatusCodes.Status403Forbidden);
+
+        try
+        {
+            var deleted = await _service.DeleteFormSourceAsync(id, cancellationToken);
+
+            if (!deleted)
+                return new NotFoundResult();
+
+            return new NoContentResult();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting form source {SourceId}", id);
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+}
 }
