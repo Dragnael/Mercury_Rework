@@ -1,12 +1,27 @@
 {
     "version": "2.0",
+    "functionTimeout": "00:05:00",
     "logging": {
         "applicationInsights": {
             "samplingSettings": {
                 "isEnabled": true,
-                "excludedTypes": "Request"
+                "maxTelemetryItemsPerSecond": 5
             },
             "enableLiveMetricsFilters": true
+        },
+        "logLevel": {
+            "Default": "Information",
+            "Microsoft": "Warning",
+            "Microsoft.Hosting.Lifetime": "Information",
+            "Nodsoft.Mercury": "Debug"
+        }
+    },
+    "extensions": {
+        "http": {
+            "routePrefix": "",
+            "maxConcurrentRequests": 100,
+            "maxOutstandingRequests": 200,
+            "dynamicThrottlesEnabled": true
         }
     }
 }
