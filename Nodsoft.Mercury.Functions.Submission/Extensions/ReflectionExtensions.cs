@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Microsoft.Azure.Functions.Worker;
 using Throw;
@@ -11,6 +11,12 @@ namespace Nodsoft.Mercury.Functions.Submission.Extensions;
 /// </summary>
 public static class ReflectionExtensions
 {
+	private static readonly BindingFlags DefaultBindingFlags =
+		BindingFlags.Public |
+		BindingFlags.Instance |
+		BindingFlags.Static |
+		BindingFlags.FlattenHierarchy;
+
 	/// <summary>
 	/// Gets the <see cref="System.Reflection.MethodInfo"/> out of a fully qualified method name.
 	/// </summary>
@@ -21,25 +27,42 @@ public static class ReflectionExtensions
 	/// <returns>The <see cref="System.Reflection.MethodInfo"/> for the method.</returns>
 	/// <exception cref="System.ArgumentException">Thrown if <paramref name="methodPath"/> is empty or not a valid fully qualified method name.</exception>
 	/// <exception cref="System.Reflection.AmbiguousMatchException">Thrown if multiple methods match the <paramref name="methodPath"/>.</exception>
+	[RequiresUnreferencedCode("Uses reflection on types and methods which may be trimmed in AOT scenarios.")]
 	public static MethodInfo GetMethodInfo(string methodPath)
 	{
 		methodPath.Throw().IfEmpty();
-		
-		// Separate the class name & namespace from the method name.
-		// Method name is the last part of the array.
+
 		int lastDot = methodPath.LastIndexOf('.');
+		if (lastDot <= 0 || lastDot == methodPath.Length - 1)
+		{
+			throw new ArgumentException("Invalid fully qualified method name.", nameof(methodPath));
+		}
+
 		string typeName = methodPath[..lastDot];
 		string methodName = methodPath[(lastDot + 1)..];
-		
-		// Get the class type
-		Type? classType = Type.GetType(typeName);
-		classType.ThrowIfNull();
-		
-		// Get the method info
-		MethodInfo? methodInfo = classType.GetMethod(methodName);
-		methodInfo.ThrowIfNull();
-		
-		return methodInfo;
+
+		// Try to resolve the type safely (important for Azure / Aspire multi-assembly scenarios)
+		Type? classType =
+			Type.GetType(typeName, throwOnError: false) ??
+			AppDomain.CurrentDomain
+				.GetAssemblies()
+				.Select(a => a.GetType(typeName, false))
+				.FirstOrDefault(t => t != null);
+
+		classType.ThrowIfNull($"Unable to resolve type '{typeName}'.");
+
+		MethodInfo[] methods = classType
+			.GetMethods(DefaultBindingFlags)
+			.Where(m => m.Name == methodName)
+			.ToArray();
+
+		if (methods.Length == 0)
+			throw new ArgumentException($"Method '{methodName}' not found on type '{typeName}'.");
+
+		if (methods.Length > 1)
+			throw new AmbiguousMatchException($"Multiple methods named '{methodName}' found on type '{typeName}'.");
+
+		return methods[0];
 	}
 
 	/// <summary>
@@ -50,7 +73,11 @@ public static class ReflectionExtensions
 	/// <param name="fallbackToClass">Whether to fallback to the class if the attribute is not found on the function method itself.</param>
 	/// <returns>The attribute, or null if not found.</returns>
 	[Pure]
-	public static TAttribute? GetFunctionAttribute<TAttribute>(this FunctionContext context, bool fallbackToClass = false) where TAttribute : Attribute 
+	[RequiresUnreferencedCode("Uses reflection which may be trimmed in AOT scenarios.")]
+	public static TAttribute? GetFunctionAttribute<TAttribute>(
+		this FunctionContext context,
+		bool fallbackToClass = false)
+		where TAttribute : Attribute
 		=> context.GetFunctionAttribute(typeof(TAttribute), fallbackToClass) as TAttribute;
 
 	/// <summary>
@@ -62,13 +89,25 @@ public static class ReflectionExtensions
 	/// <returns>The attribute, or null if not found.</returns>
 	/// <exception cref="ArgumentException">Thrown if <paramref name="type"/> is not an attribute.</exception>
 	[Pure]
-	public static Attribute? GetFunctionAttribute(this FunctionContext context, Type type, bool fallbackToClass = false)
+	[RequiresUnreferencedCode("Uses reflection which may be trimmed in AOT scenarios.")]
+	public static Attribute? GetFunctionAttribute(
+		this FunctionContext context,
+		Type type,
+		bool fallbackToClass = false)
 	{
-		type.Throw("The type must be an attribute.").IfFalse(static t => t.IsSubclassOf(typeof(Attribute)));
-		
+		type.Throw("The type must be an attribute.")
+			.IfFalse(static t => typeof(Attribute).IsAssignableFrom(t));
+
 		MethodInfo methodInfo = GetMethodInfo(context.FunctionDefinition.EntryPoint);
-		Attribute? attribute = methodInfo.GetCustomAttribute(type);									// Attribute from method
-		attribute ??= fallbackToClass ? methodInfo.DeclaringType?.GetCustomAttribute(type) : null;	// Attribute from class (fallback)
+
+		// Method level
+		Attribute? attribute = methodInfo.GetCustomAttribute(type, inherit: true);
+
+		// Class fallback
+		if (attribute is null && fallbackToClass)
+		{
+			attribute = methodInfo.DeclaringType?.GetCustomAttribute(type, inherit: true);
+		}
 
 		return attribute;
 	}
@@ -82,15 +121,39 @@ public static class ReflectionExtensions
 	/// <param name="fallbackToAssembly">Whether to fallback to the assembly if the attribute is not found on the function method or class.</param>
 	/// <returns>The attributes, or an empty array if not found.</returns>
 	[Pure]
-	public static TAttribute[] GetFunctionAttributes<TAttribute>(this FunctionContext context, bool fallbackToClass = false, bool fallbackToAssembly = false)
+	[RequiresUnreferencedCode("Uses reflection which may be trimmed in AOT scenarios.")]
+	public static TAttribute[] GetFunctionAttributes<TAttribute>(
+		this FunctionContext context,
+		bool fallbackToClass = false,
+		bool fallbackToAssembly = false)
 		where TAttribute : Attribute
 	{
 		MethodInfo methodInfo = GetMethodInfo(context.FunctionDefinition.EntryPoint);
-		
-		return methodInfo.GetCustomAttributes<TAttribute>().ToArray() is { Length: not 0 } methodAttributes ? methodAttributes 
-			: fallbackToClass && methodInfo.DeclaringType?.GetCustomAttributes<TAttribute>().ToArray() is { Length: not 0 } classAttributes ? classAttributes
-				: fallbackToAssembly && methodInfo.DeclaringType?.Assembly.GetCustomAttributes<TAttribute>().ToArray() is { Length: not 0 } assemblyAttributes ? assemblyAttributes
-					: [];
+
+		TAttribute[] methodAttributes =
+			methodInfo.GetCustomAttributes<TAttribute>(inherit: true).ToArray();
+
+		if (methodAttributes.Length != 0)
+			return methodAttributes;
+
+		if (fallbackToClass && methodInfo.DeclaringType is not null)
+		{
+			TAttribute[] classAttributes =
+				methodInfo.DeclaringType.GetCustomAttributes<TAttribute>(inherit: true).ToArray();
+
+			if (classAttributes.Length != 0)
+				return classAttributes;
+		}
+
+		if (fallbackToAssembly && methodInfo.DeclaringType?.Assembly is Assembly assembly)
+		{
+			TAttribute[] assemblyAttributes =
+				assembly.GetCustomAttributes<TAttribute>().ToArray();
+
+			if (assemblyAttributes.Length != 0)
+				return assemblyAttributes;
+		}
+
+		return Array.Empty<TAttribute>();
 	}
-	
 }

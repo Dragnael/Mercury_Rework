@@ -3,6 +3,7 @@ using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using Nodsoft.Mercury.Data;
 using Nodsoft.Mercury.Functions.Submission.Services;
 using Nodsoft.Mercury.Functions.Submission.Services.Middlewares;
@@ -11,10 +12,16 @@ Console.WriteLine("NSYS Mercury - Submission API");
 
 FunctionsApplicationBuilder builder = FunctionsApplication.CreateBuilder(args);
 
+IHostEnvironment environment = builder.Environment;
+IConfiguration configuration = builder.Configuration;
+
 builder.ConfigureFunctionsWebApplication(options =>
 {
-    // Enforce HTTPS redirection when possible (local/dev scenarios)
-    options.UseHttpsRedirection();
+    // HTTPS redirection only in Development
+    if (environment.IsDevelopment())
+    {
+        options.UseHttpsRedirection();
+    }
 });
 
 builder.AddCosmosDbContext<MercuryDbContext>("formsdb", "forms-db");
@@ -36,8 +43,17 @@ builder.Services.AddOpenTelemetry()
     });
 
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.SetMinimumLevel(LogLevel.Information);
+
+if (environment.IsDevelopment())
+{
+    builder.Logging.AddConsole();
+    builder.Logging.SetMinimumLevel(LogLevel.Debug);
+}
+else
+{
+    builder.Logging.AddConsole();
+    builder.Logging.SetMinimumLevel(LogLevel.Information);
+}
 
 // Middleware pipeline
 builder.UseMiddleware<AccessTokenMiddleware>();
@@ -53,10 +69,9 @@ using IHost host = builder.Build();
 // Warmup start
 await host.StartAsync();
 
-// Ensure Cosmos DB is ready (safe for dev / small scale)
-// ⚠️ En production à forte charge, préférer migration contrôlée
-await using (AsyncServiceScope scope = host.Services.CreateAsyncScope())
+if (environment.IsDevelopment())
 {
+    await using AsyncServiceScope scope = host.Services.CreateAsyncScope();
     await using MercuryDbContext context =
         scope.ServiceProvider.GetRequiredService<MercuryDbContext>();
 
@@ -64,3 +79,4 @@ await using (AsyncServiceScope scope = host.Services.CreateAsyncScope())
 }
 
 await host.WaitForShutdownAsync();
+
